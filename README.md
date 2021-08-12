@@ -1,14 +1,29 @@
-# html_editor
+# Flutter HTML Editor
 
-A new Flutter package project.
+Flutter HTML Editor is a simple HTML-based Richtext editor, which is able to edit and parse a selected set of HTML tags into a Flutter widget. 
 
-## Getting Started
+## Features
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+- Code Editor where HTML text can be written with an optional preview output
+- Richtext-Renderer which takes in HTML produced by the editor and converts it into a widget
+- Customization options for Editor and Renderer
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## Usage
+
+1. Import the package ```import 'package:html_editor/editor.dart';``` for the editor or ```import 'package:html_editor/renderer.dart';``` for the renderer
+2. Create an environment with a **finite width**, as the widgets will take up all available horizontal space
+3. Instantiate ```RichTextEditor``` or ```RichTextRenderer```
+4. Set desired parameters like the ```onChanged``` callbacks for retrieving the richtext 
+
+## Example
+    SizedBox(
+        width: 400,
+        child: RichTextEditor(
+            onChanged: (String html) {
+                // called every time the code in the input text is changed
+                // do something with the richtext
+            },
+        ),
+    ),
+
+![Contribution guidelines for this project](.doc/example1.png)

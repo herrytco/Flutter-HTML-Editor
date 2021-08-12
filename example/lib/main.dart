@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:html_editor/editor.dart';
+import 'package:html_editor/renderer.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,7 +19,11 @@ class MyApp extends StatelessWidget {
         body: Center(
           child: SizedBox(
             width: 400,
-            child: RichTextEditor(),
+            child: RichTextEditor(
+              onChanged: (String html) {
+                // do something with the richtext
+              },
+            ),
           ),
         ),
       ),
