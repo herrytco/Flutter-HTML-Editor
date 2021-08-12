@@ -139,6 +139,7 @@ class RichtextRenderer extends StatelessWidget {
           style: node.style,
         ),
       );
+      textLength += nodeText.length;
 
       if (node.invokesNewline && tmp.length > 0) {
         result.add(
