@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:html_editor/editor.dart';
+import 'package:html_editor/placeholder.dart';
 import 'package:html_editor/richtext/richtext_node.dart';
 import 'package:html_editor/richtext/text_constants.dart';
 
@@ -32,7 +35,10 @@ class RichtextRenderer extends StatelessWidget {
     this.defaultFontSize = TextConstants.defaultFontSize,
     this.defaultColor = TextConstants.defaultColor,
     this.label,
+    this.maxLength,
     this.labelStyle = TextConstants.labelStyle,
+    this.placeholderMarker = "\\\$",
+    this.placeholders = const [],
   }) : super(key: key);
 
   final String? label;
@@ -42,6 +48,9 @@ class RichtextRenderer extends StatelessWidget {
   final EdgeInsets padding;
   final Color defaultColor;
   final double defaultFontSize;
+  final int? maxLength;
+  final String placeholderMarker;
+  final List<RichTextPlaceholder> placeholders;
 
   ///
   /// Creates a new instance of an HTML renderer. Takes a richtext created by
@@ -116,10 +125,31 @@ class RichtextRenderer extends StatelessWidget {
 
     List<TextSpan> tmp = [TextSpan(text: "")];
 
+    int textLength = 0;
+    bool full = false;
+
     for (_TextNode node in flattenedNodes) {
+      String nodeText = node.text;
+      if (maxLength != null && textLength + nodeText.length > maxLength!) {
+        nodeText = nodeText.substring(
+                0, min(maxLength! - textLength, nodeText.length)) +
+            "...";
+        full = true;
+      }
+
+      for (RichTextPlaceholder placeholder in placeholders) {
+        String search =
+            "$placeholderMarker${placeholder.symbol}$placeholderMarker";
+
+        nodeText = nodeText.replaceAll(
+          RegExp(search),
+          "${placeholder.value}",
+        );
+      }
+
       tmp.add(
         TextSpan(
-          text: node.text,
+          text: nodeText,
           style: node.style,
         ),
       );

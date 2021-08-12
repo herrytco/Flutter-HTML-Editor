@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:html_editor/editor.dart';
-import 'package:html_editor/renderer.dart';
+import 'package:html_editor/placeholder.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,6 +20,10 @@ class MyApp extends StatelessWidget {
           child: SizedBox(
             width: 400,
             child: RichTextEditor(
+              placeholders: [
+                RichTextPlaceholder(
+                    "VAR", "Some longer text that got shortened!"),
+              ],
               onChanged: (String html) {
                 // do something with the richtext
               },

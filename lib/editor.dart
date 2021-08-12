@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:html_editor/placeholder.dart';
 import 'package:html_editor/richtext/buttons/color_button.dart';
 import 'package:html_editor/richtext/buttons/font_button.dart';
 import 'package:html_editor/richtext/buttons/text_button.dart';
@@ -38,6 +39,10 @@ class RichTextEditor extends StatefulWidget {
   /// not at the rendered text.
   ///
   /// If [initialValue] is set, the provided text is loaded into the editor.
+  /// 
+  /// It is possible to use placeholders in the code. They have to be enclosed
+  /// with [placeholderMarker]. If the marker is set to "$" for example, it could
+  /// look like $VARIABLE$, which would get substituted in the richtext. 
   ///
   const RichTextEditor({
     Key? key,
@@ -53,6 +58,8 @@ class RichTextEditor extends StatefulWidget {
     this.onChanged = RichTextEditor._doNothingWithResult,
     this.maxLength,
     this.initialValue,
+    this.placeholderMarker = "\\\$",
+    this.placeholders = const [],
   }) : super(key: key);
 
   final Color backgroundColor;
@@ -66,6 +73,8 @@ class RichTextEditor extends StatefulWidget {
   final TextStyle labelStyle;
   final TextStyle focusedLabelStyle;
   final int? maxLength;
+  final String placeholderMarker;
+  final List<RichTextPlaceholder> placeholders;
 
   final Function(String) onChanged;
 
@@ -318,6 +327,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
                 root: _node,
                 label: widget.previewLabel,
                 labelStyle: widget.previewLabelStyle,
+                placeholders: widget.placeholders,
+                placeholderMarker: widget.placeholderMarker,
               ),
             ),
         ],
