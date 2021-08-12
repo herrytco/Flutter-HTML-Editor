@@ -7,6 +7,8 @@ import 'package:light_html_editor/richtext/buttons/color_button.dart';
 import 'package:light_html_editor/richtext/buttons/font_button.dart';
 import 'package:light_html_editor/richtext/buttons/text_button.dart';
 import 'package:light_html_editor/renderer.dart';
+import 'package:light_html_editor/richtext/editor_properties.dart';
+import 'package:light_html_editor/richtext/renderer_properties.dart';
 import 'package:light_html_editor/richtext/richtext_node.dart';
 import 'package:light_html_editor/richtext/text_constants.dart';
 
@@ -39,42 +41,36 @@ class RichTextEditor extends StatefulWidget {
   /// not at the rendered text.
   ///
   /// If [initialValue] is set, the provided text is loaded into the editor.
-  /// 
+  ///
   /// It is possible to use placeholders in the code. They have to be enclosed
   /// with [placeholderMarker]. If the marker is set to "$" for example, it could
-  /// look like $VARIABLE$, which would get substituted in the richtext. 
+  /// look like $VARIABLE$, which would get substituted in the richtext.
   ///
   const RichTextEditor({
     Key? key,
-    this.editorLabel,
-    this.backgroundColor = Colors.white,
-    this.cursorColor = Colors.black,
-    this.inputStyle = TextConstants.labelStyle,
-    this.labelStyle = TextConstants.labelStyle,
-    this.focusedLabelStyle = TextConstants.labelStyle,
-    this.previewLabelStyle = TextConstants.labelStyle,
     this.showPreview = true,
-    this.previewLabel = "Preview",
-    this.onChanged = RichTextEditor._doNothingWithResult,
-    this.maxLength,
+    this.showHeaderButton = true,
     this.initialValue,
+    this.maxLength,
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
+    this.onChanged = RichTextEditor._doNothingWithResult,
+    this.previewDecoration = const RendererDecoration(
+      label: "Preview",
+      labelStyle: TextConstants.labelStyle,
+    ),
+    this.editorDecoration = const EditorDecoration(),
   }) : super(key: key);
 
-  final Color backgroundColor;
-  final Color cursorColor;
-  final String? editorLabel;
   final bool showPreview;
-  final String previewLabel;
+  final bool showHeaderButton;
   final String? initialValue;
-  final TextStyle previewLabelStyle;
-  final TextStyle inputStyle;
-  final TextStyle labelStyle;
-  final TextStyle focusedLabelStyle;
   final int? maxLength;
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
+
+  final RendererDecoration previewDecoration;
+  final EditorDecoration editorDecoration;
 
   final Function(String) onChanged;
 
@@ -231,7 +227,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: widget.backgroundColor,
+      color: widget.editorDecoration.backgroundColor,
       width: double.infinity,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -283,13 +279,13 @@ class _RichTextEditorState extends State<RichTextEditor> {
                 if (currentLength != null && widget.maxLength != null)
                   return Text(
                     "$currentLength/${widget.maxLength}",
-                    style: widget.labelStyle,
+                    style: widget.editorDecoration.labelStyle,
                   );
 
                 if (currentLength != null)
                   return Text(
                     "$currentLength",
-                    style: widget.labelStyle,
+                    style: widget.editorDecoration.labelStyle,
                   );
 
                 return SizedBox();
@@ -301,10 +297,10 @@ class _RichTextEditorState extends State<RichTextEditor> {
               maxLength: widget.maxLength,
               maxLengthEnforcement: MaxLengthEnforcement.enforced,
               decoration: InputDecoration(
-                labelText: widget.editorLabel,
+                labelText: widget.editorDecoration.editorLabel,
                 labelStyle: _focusNode.hasFocus
-                    ? widget.focusedLabelStyle
-                    : widget.labelStyle,
+                    ? widget.editorDecoration.focusedLabelStyle
+                    : widget.editorDecoration.labelStyle,
                 enabledBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
                     color: Theme.of(context).primaryColor,
@@ -316,8 +312,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
                   ),
                 ),
               ),
-              cursorColor: widget.cursorColor,
-              style: widget.inputStyle,
+              cursorColor: widget.editorDecoration.cursorColor,
+              style: widget.editorDecoration.inputStyle,
             ),
           ),
           if (widget.showPreview)
@@ -325,10 +321,9 @@ class _RichTextEditorState extends State<RichTextEditor> {
               padding: const EdgeInsets.all(8.0),
               child: RichtextRenderer(
                 root: _node,
-                label: widget.previewLabel,
-                labelStyle: widget.previewLabelStyle,
                 placeholders: widget.placeholders,
                 placeholderMarker: widget.placeholderMarker,
+                rendererDecoration: widget.previewDecoration,
               ),
             ),
         ],

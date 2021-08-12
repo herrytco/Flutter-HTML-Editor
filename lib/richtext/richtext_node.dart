@@ -92,7 +92,7 @@ class DocumentNode {
   ///
   /// If the parsing fails, the property will be ignored.
   ///
-  Color _getStylePropertyColorOrDefault(String key, Color defaultValue) {
+  Color? _getStylePropertyColorOrDefault(String key) {
     DocumentNode? workingNode = this;
 
     while (workingNode != null) {
@@ -109,7 +109,7 @@ class DocumentNode {
       workingNode = workingNode.parent;
     }
 
-    return defaultValue;
+    return null;
   }
 
   ///
@@ -131,7 +131,7 @@ class DocumentNode {
   /// If no suitable candidate is found, [TextConstants.defaultFontSize] will be
   /// returned.
   ///
-  double get fontSize {
+  double? get fontSize {
     DocumentNode? workingNode = this;
     String key = "font-size";
 
@@ -157,7 +157,7 @@ class DocumentNode {
       workingNode = workingNode.parent;
     }
 
-    return TextConstants.defaultFontSize;
+    return null;
   }
 
   ///
@@ -168,10 +168,7 @@ class DocumentNode {
   /// If no suitable candidate is found, [TextConstants.defaultColor] will be
   /// returned.
   ///
-  Color get textColor => _getStylePropertyColorOrDefault(
-        "color",
-        TextConstants.defaultColor,
-      );
+  Color? get textColor => _getStylePropertyColorOrDefault("color");
 
   /// recursively prints the subtree into the console
   void printNode({intend = 0}) {

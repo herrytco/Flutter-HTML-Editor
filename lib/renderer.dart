@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/editor.dart';
 import 'package:light_html_editor/placeholder.dart';
+import 'package:light_html_editor/richtext/renderer_properties.dart';
 import 'package:light_html_editor/richtext/richtext_node.dart';
-import 'package:light_html_editor/richtext/text_constants.dart';
 
 ///
 /// Lightweight HTML renderer converting basic HTML text into Richtext
@@ -30,27 +30,17 @@ class RichtextRenderer extends StatelessWidget {
   const RichtextRenderer({
     Key? key,
     @required this.root,
-    this.hasBorder = true,
-    this.padding = const EdgeInsets.all(4),
-    this.defaultFontSize = TextConstants.defaultFontSize,
-    this.defaultColor = TextConstants.defaultColor,
-    this.label,
     this.maxLength,
-    this.labelStyle = TextConstants.labelStyle,
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
+    this.rendererDecoration = const RendererDecoration(),
   }) : super(key: key);
 
-  final String? label;
-  final TextStyle labelStyle;
   final DocumentNode? root;
-  final bool hasBorder;
-  final EdgeInsets padding;
-  final Color defaultColor;
-  final double defaultFontSize;
   final int? maxLength;
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
+  final RendererDecoration rendererDecoration;
 
   ///
   /// Creates a new instance of an HTML renderer. Takes a richtext created by
@@ -71,21 +61,13 @@ class RichtextRenderer extends StatelessWidget {
   ///
   factory RichtextRenderer.fromRichtext(
     String richtext, {
-    String? label,
-    TextStyle labelStyle = TextConstants.labelStyle,
-    bool hasBorder = true,
-    EdgeInsets padding = const EdgeInsets.all(4),
-    double defaultFontSize = TextConstants.defaultFontSize,
-    Color defaultColor = TextConstants.defaultColor,
+    int? maxLength,
+    RendererDecoration rendererDecoration = const RendererDecoration(),
   }) {
     return RichtextRenderer(
       root: Parser().parse(richtext),
-      label: label,
-      labelStyle: labelStyle,
-      hasBorder: hasBorder,
-      padding: padding,
-      defaultFontSize: defaultFontSize,
-      defaultColor: defaultColor,
+      maxLength: maxLength,
+      rendererDecoration: rendererDecoration,
     );
   }
 
@@ -95,15 +77,19 @@ class RichtextRenderer extends StatelessWidget {
   ///
   void _processNodeNew(DocumentNode node, List<_TextNode> result) {
     for (int i = 0; i < node.text.length; i++) {
-      if (node.text[i] != null && node.text[i].isNotEmpty)
+      if (node.text[i].isNotEmpty)
         result.add(
           _TextNode(
             node.text[i],
             TextStyle(
-              fontSize: node.fontSize != null ? node.fontSize : defaultFontSize,
+              fontSize: node.fontSize != null
+                  ? node.fontSize
+                  : rendererDecoration.defaultFontSize,
               fontWeight: node.isBold ? FontWeight.bold : FontWeight.normal,
               fontStyle: node.isItalics ? FontStyle.italic : FontStyle.normal,
-              color: node.textColor != null ? node.textColor : defaultColor,
+              color: node.textColor != null
+                  ? node.textColor
+                  : rendererDecoration.defaultColor,
               decoration: node.underline,
             ),
             node.invokesNewline,
@@ -162,6 +148,8 @@ class RichtextRenderer extends StatelessWidget {
         );
         tmp = [];
       }
+
+      if (full) break;
     }
 
     if (tmp.length > 0)
@@ -186,20 +174,16 @@ class RichtextRenderer extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        border: hasBorder
-            ? Border.all(
-                color: Colors.black,
-              )
-            : Border.all(
-                color: Colors.transparent,
-              ),
+        border: rendererDecoration.border != null
+            ? rendererDecoration.border!
+            : Border.all(color: Colors.transparent),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: padding,
+            padding: rendererDecoration.padding,
             child: root != null
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,12 +205,13 @@ class RichtextRenderer extends StatelessWidget {
                     child: Text(" "),
                   ),
           ),
-          if (label != null && label!.isNotEmpty)
+          if (rendererDecoration.label != null &&
+              rendererDecoration.label!.isNotEmpty)
             Padding(
-              padding: padding,
+              padding: rendererDecoration.padding,
               child: Text(
-                label!,
-                style: labelStyle,
+                rendererDecoration.label!,
+                style: rendererDecoration.labelStyle,
               ),
             ),
         ],
