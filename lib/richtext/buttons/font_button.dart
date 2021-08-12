@@ -39,7 +39,7 @@ class FontIconButton extends StatelessWidget {
         child: Image.asset(
           icon,
           fit: BoxFit.cover,
-          package: "html_editor",
+          package: "light_html_editor",
         ),
       ),
     );

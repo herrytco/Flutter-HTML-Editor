@@ -1,10 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:html_editor/editor.dart';
-import 'package:html_editor/placeholder.dart';
-import 'package:html_editor/richtext/richtext_node.dart';
-import 'package:html_editor/richtext/text_constants.dart';
+import 'package:light_html_editor/editor.dart';
+import 'package:light_html_editor/placeholder.dart';
+import 'package:light_html_editor/richtext/richtext_node.dart';
+import 'package:light_html_editor/richtext/text_constants.dart';
 
 ///
 /// Lightweight HTML renderer converting basic HTML text into Richtext

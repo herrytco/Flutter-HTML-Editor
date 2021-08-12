@@ -67,7 +67,7 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  html_editor:
+  light_html_editor:
     dependency: "direct main"
     description:
       path: ".."

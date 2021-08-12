@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:html_editor/richtext/buttons/custom_button.dart';
-import 'package:html_editor/richtext/color_utils.dart';
+import 'package:light_html_editor/richtext/buttons/custom_button.dart';
+import 'package:light_html_editor/richtext/color_utils.dart';
 
 ///
 /// Editor-button where the content of the button is an "A" with a color-bar

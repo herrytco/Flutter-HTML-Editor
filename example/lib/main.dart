@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:html_editor/editor.dart';
-import 'package:html_editor/placeholder.dart';
+import 'package:light_html_editor/editor.dart';
+import 'package:light_html_editor/placeholder.dart';
 
 void main() {
   runApp(MyApp());

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:html_editor/richtext/color_utils.dart';
-import 'package:html_editor/richtext/text_constants.dart';
+import 'package:light_html_editor/richtext/color_utils.dart';
+import 'package:light_html_editor/richtext/text_constants.dart';
 
 ///
 /// one node of an HTML ParseTree. contains all text-pieced in the current layer

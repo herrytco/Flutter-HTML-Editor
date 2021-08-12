@@ -2,13 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:html_editor/placeholder.dart';
-import 'package:html_editor/richtext/buttons/color_button.dart';
-import 'package:html_editor/richtext/buttons/font_button.dart';
-import 'package:html_editor/richtext/buttons/text_button.dart';
-import 'package:html_editor/renderer.dart';
-import 'package:html_editor/richtext/richtext_node.dart';
-import 'package:html_editor/richtext/text_constants.dart';
+import 'package:light_html_editor/placeholder.dart';
+import 'package:light_html_editor/richtext/buttons/color_button.dart';
+import 'package:light_html_editor/richtext/buttons/font_button.dart';
+import 'package:light_html_editor/richtext/buttons/text_button.dart';
+import 'package:light_html_editor/renderer.dart';
+import 'package:light_html_editor/richtext/richtext_node.dart';
+import 'package:light_html_editor/richtext/text_constants.dart';
 
 ///
 /// Lightweight HTML editor with optional preview function. Uses all width
