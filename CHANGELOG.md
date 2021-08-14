@@ -1,3 +1,7 @@
+## 0.0.4
+
+* fixed the link to the example image
+
 ## 0.0.3
 
 * extracted styling properties into configuration classes

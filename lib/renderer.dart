@@ -34,6 +34,7 @@ class RichtextRenderer extends StatelessWidget {
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
     this.rendererDecoration = const RendererDecoration(),
+    this.ignoreLinebreaks = false,
   }) : super(key: key);
 
   final DocumentNode? root;
@@ -41,6 +42,7 @@ class RichtextRenderer extends StatelessWidget {
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
   final RendererDecoration rendererDecoration;
+  final bool ignoreLinebreaks;
 
   ///
   /// Creates a new instance of an HTML renderer. Takes a richtext created by
@@ -63,11 +65,13 @@ class RichtextRenderer extends StatelessWidget {
     String richtext, {
     int? maxLength,
     RendererDecoration rendererDecoration = const RendererDecoration(),
+    bool ignoreLinebreaks = false,
   }) {
     return RichtextRenderer(
       root: Parser().parse(richtext),
       maxLength: maxLength,
       rendererDecoration: rendererDecoration,
+      ignoreLinebreaks: ignoreLinebreaks,
     );
   }
 
@@ -141,7 +145,7 @@ class RichtextRenderer extends StatelessWidget {
       );
       textLength += nodeText.length;
 
-      if (node.invokesNewline && tmp.length > 0) {
+      if (!ignoreLinebreaks && node.invokesNewline && tmp.length > 0) {
         result.add(
           RichText(
             text: TextSpan(children: tmp),

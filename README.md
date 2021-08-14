@@ -27,4 +27,4 @@ Flutter HTML Editor is a simple HTML-based Richtext editor, which is able to edi
         ),
     ),
 
-![Example Output of Flutter HTML Editor](.doc/example1.png)
+![Example Output of Flutter HTML Editor](https://github.com/herrytco/Flutter-HTML-Editor/blob/9b8d90fc9b42300e87449a1d3021179fdd35317b/.doc/example1.png?raw=true)
