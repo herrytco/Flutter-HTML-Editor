@@ -1,3 +1,9 @@
+## 0.0.5
+
+* extracted logic to replace variables into parser class
+* created aggregated import class to import all needed file at once
+* added GitHub Link 
+
 ## 0.0.4
 
 * fixed the link to the example image

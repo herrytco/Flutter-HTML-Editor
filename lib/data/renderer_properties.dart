@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:light_html_editor/richtext/text_constants.dart';
+import 'package:light_html_editor/data/text_constants.dart';
 
 class RendererDecoration {
   final BoxBorder? border;
