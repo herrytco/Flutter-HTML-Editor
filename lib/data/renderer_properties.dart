@@ -8,6 +8,7 @@ class RendererDecoration {
   final Color defaultColor;
   final double defaultFontSize;
   final EdgeInsets padding;
+  final double? maxHeight;
 
   const RendererDecoration({
     this.border,
@@ -16,5 +17,6 @@ class RendererDecoration {
     this.defaultColor = TextConstants.defaultColor,
     this.defaultFontSize = TextConstants.defaultFontSize,
     this.padding = const EdgeInsets.all(8),
+    this.maxHeight,
   });
 }

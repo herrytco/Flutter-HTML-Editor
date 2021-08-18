@@ -61,6 +61,8 @@ class RichTextEditor extends StatefulWidget {
       labelStyle: TextConstants.labelStyle,
     ),
     this.editorDecoration = const EditorDecoration(),
+    this.availableColors = TextConstants.defaultColors,
+    this.controller,
   }) : super(key: key);
 
   final bool showPreview;
@@ -69,6 +71,8 @@ class RichTextEditor extends StatefulWidget {
   final int? maxLength;
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
+  final List<String> availableColors;
+  final TextEditingController? controller;
 
   final RendererDecoration previewDecoration;
   final EditorDecoration editorDecoration;
@@ -94,6 +98,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
 
   @override
   void initState() {
+    if (widget.controller != null) _textEditingController = widget.controller!;
+
     _textEditingController.text = widget.initialValue ?? "";
 
     _focusNode.addListener(() {
@@ -263,7 +269,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                     onClick: _onH3,
                     icon: "H3",
                   ),
-                  for (String color in TextConstants.colors)
+                  for (String color in widget.availableColors)
                     FontColorButton.fromColor(color, () => _onColor(color)),
                 ],
               ),

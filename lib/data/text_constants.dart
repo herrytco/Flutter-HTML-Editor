@@ -23,14 +23,14 @@ class TextConstants {
   );
 
   /// available list of colors
-  static const List<String> colors = [
+  static const List<String> defaultColors = [
     "#ff0000",
     "#cc0000",
     "#00ff00",
     "#6aa84f",
     "#0000ff",
     "#ffff00",
-    "#ff00ff",
+    "#ff77ff",
     "#9900ff",
     "#bf9001",
     "#666666"

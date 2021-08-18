@@ -1,3 +1,9 @@
+## 0.0.6
+
+* added maxHeight property to the renderer to have a scrolling preview when the content exceeds the desired maximum height
+* added property to override the existing color-presets
+* added option to pass a TextEditingController to the editor
+
 ## 0.0.5
 
 * extracted logic to replace variables into parser class

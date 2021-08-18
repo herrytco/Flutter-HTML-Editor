@@ -187,21 +187,30 @@ class RichtextRenderer extends StatelessWidget {
           Padding(
             padding: rendererDecoration.padding,
             child: root != null
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: _renderText()
-                        .map(
-                          (RichText line) => Container(
-                            child: line,
-                            // decoration: BoxDecoration(
-                            //   border: Border.all(
-                            //     color: Colors.black,
-                            //   ),
-                            // ),
-                          ),
-                        )
-                        .toList(),
+                ? Container(
+                    constraints: BoxConstraints(
+                      maxHeight: rendererDecoration.maxHeight != null
+                          ? rendererDecoration.maxHeight!
+                          : double.infinity,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: _renderText()
+                            .map(
+                              (RichText line) => Container(
+                                child: line,
+                                // decoration: BoxDecoration(
+                                //   border: Border.all(
+                                //     color: Colors.black,
+                                //   ),
+                                // ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
                   )
                 : SizedBox(
                     child: Text(" "),
