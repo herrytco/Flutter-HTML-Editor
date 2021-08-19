@@ -90,9 +90,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
   /// focusNode of the editor input field
   FocusNode _focusNode = FocusNode();
 
-  /// root of the parse-tree
-  DocumentNode? _node;
-
   /// handles visibility of editor-controls
   bool _areButtonsVisible = false;
 
@@ -100,7 +97,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
   void initState() {
     if (widget.controller != null) _textEditingController = widget.controller!;
 
-    _textEditingController.text = widget.initialValue ?? "";
+    if (_textEditingController.text.isEmpty)
+      _textEditingController.text = widget.initialValue ?? "";
 
     _focusNode.addListener(() {
       setState(() {
@@ -109,9 +107,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
     });
 
     _textEditingController.addListener(() {
-      setState(() {
-        _node = Parser().parse(_textEditingController.text);
-      });
+      setState(() {});
 
       widget.onChanged(_textEditingController.text);
     });
@@ -325,12 +321,12 @@ class _RichTextEditorState extends State<RichTextEditor> {
           ),
           if (widget.showPreview)
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: RichtextRenderer(
-                root: _node,
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: RichtextRenderer.fromRichtext(
+                _textEditingController.text,
+                rendererDecoration: widget.previewDecoration,
                 placeholders: widget.placeholders,
                 placeholderMarker: widget.placeholderMarker,
-                rendererDecoration: widget.previewDecoration,
               ),
             ),
         ],

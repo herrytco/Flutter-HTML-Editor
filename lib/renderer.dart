@@ -67,12 +67,16 @@ class RichtextRenderer extends StatelessWidget {
     int? maxLength,
     RendererDecoration rendererDecoration = const RendererDecoration(),
     bool ignoreLinebreaks = false,
+    String placeholderMarker = "\\\$",
+    List<RichTextPlaceholder> placeholders = const [],
   }) {
     return RichtextRenderer(
       root: Parser().parse(richtext),
       maxLength: maxLength,
       rendererDecoration: rendererDecoration,
       ignoreLinebreaks: ignoreLinebreaks,
+      placeholderMarker: placeholderMarker,
+      placeholders: placeholders,
     );
   }
 
@@ -184,41 +188,40 @@ class RichtextRenderer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
+          Container(
             padding: rendererDecoration.padding,
-            child: root != null
-                ? Container(
-                    constraints: BoxConstraints(
-                      maxHeight: rendererDecoration.maxHeight != null
-                          ? rendererDecoration.maxHeight!
-                          : double.infinity,
+            width: double.infinity,
+            constraints: BoxConstraints(
+              maxHeight: rendererDecoration.maxHeight != null
+                  ? rendererDecoration.maxHeight!
+                  : double.infinity,
+            ),
+            child: SingleChildScrollView(
+              child: root != null &&
+                      root!.children.length == 0 &&
+                      root!.text.length == 0
+                  ? SizedBox()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: _renderText()
+                          .map(
+                            (RichText line) => Container(
+                              child: line,
+                              // decoration: BoxDecoration(
+                              //   border: Border.all(
+                              //     color: Colors.black,
+                              //   ),
+                              // ),
+                            ),
+                          )
+                          .toList(),
                     ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: _renderText()
-                            .map(
-                              (RichText line) => Container(
-                                child: line,
-                                // decoration: BoxDecoration(
-                                //   border: Border.all(
-                                //     color: Colors.black,
-                                //   ),
-                                // ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  )
-                : SizedBox(
-                    child: Text(" "),
-                  ),
+            ),
           ),
           if (rendererDecoration.label != null &&
               rendererDecoration.label!.isNotEmpty)
-            Padding(
+            Container(
               padding: rendererDecoration.padding,
               child: Text(
                 rendererDecoration.label!,
