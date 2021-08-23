@@ -24,19 +24,22 @@ class FontCustomButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => onClick(),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          border: Border.all(
-            color: Colors.black,
+    return Container(
+      decoration: BoxDecoration(
+          // color: Colors.grey[50],
+          // border: Border.all(
+          //   color: Colors.black,
+          // ),
           ),
-        ),
-        width: 30,
-        height: 30,
-        child: Center(
-          child: icon,
+      width: 30,
+      height: 30,
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          onTap: () => onClick(),
+          child: Center(
+            child: icon,
+          ),
         ),
       ),
     );

@@ -2,15 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:light_html_editor/api/parser.dart';
 import 'package:light_html_editor/placeholder.dart';
 import 'package:light_html_editor/ui/buttons/color_button.dart';
-import 'package:light_html_editor/ui/buttons/font_button.dart';
-import 'package:light_html_editor/ui/buttons/text_button.dart';
+import 'package:light_html_editor/ui/buttons/custom_button.dart';
 import 'package:light_html_editor/renderer.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/data/renderer_properties.dart';
-import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 
 ///
@@ -62,6 +59,7 @@ class RichTextEditor extends StatefulWidget {
     ),
     this.editorDecoration = const EditorDecoration(),
     this.availableColors = TextConstants.defaultColors,
+    this.alwaysShowButtons = false,
     this.controller,
   }) : super(key: key);
 
@@ -73,6 +71,7 @@ class RichTextEditor extends StatefulWidget {
   final List<RichTextPlaceholder> placeholders;
   final List<String> availableColors;
   final TextEditingController? controller;
+  final bool alwaysShowButtons;
 
   final RendererDecoration previewDecoration;
   final EditorDecoration editorDecoration;
@@ -95,16 +94,19 @@ class _RichTextEditorState extends State<RichTextEditor> {
 
   @override
   void initState() {
+    _areButtonsVisible = widget.alwaysShowButtons;
+
     if (widget.controller != null) _textEditingController = widget.controller!;
 
     if (_textEditingController.text.isEmpty)
       _textEditingController.text = widget.initialValue ?? "";
 
-    _focusNode.addListener(() {
-      setState(() {
-        _areButtonsVisible = _focusNode.hasFocus;
+    if (!widget.alwaysShowButtons)
+      _focusNode.addListener(() {
+        setState(() {
+          _areButtonsVisible = _focusNode.hasFocus;
+        });
       });
-    });
 
     _textEditingController.addListener(() {
       setState(() {});
@@ -214,6 +216,9 @@ class _RichTextEditorState extends State<RichTextEditor> {
   /// wraps the current selection with <u></u>
   void _onUnderline() => _wrapWithTag("u");
 
+  /// wraps the current selection with <p></p>
+  void _onParagraph() => _wrapWithTag("p");
+
   /// wraps the current selection with <h1></h1>
   void _onH1() => _wrapWithTag("h1");
 
@@ -241,29 +246,71 @@ class _RichTextEditorState extends State<RichTextEditor> {
               width: double.infinity,
               child: Wrap(
                 children: [
-                  FontIconButton(
+                  FontCustomButton(
                     onClick: _onBold,
-                    icon: "assets/icons/editor/bold.png",
+                    icon: Text(
+                      "B",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  FontIconButton(
+                  FontCustomButton(
                     onClick: _onItalics,
-                    icon: "assets/icons/editor/italics.png",
+                    icon: Text(
+                      "I",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
                   ),
-                  FontIconButton(
+                  FontCustomButton(
                     onClick: _onUnderline,
-                    icon: "assets/icons/editor/underline.png",
+                    icon: Text(
+                      "U",
+                      style: TextStyle(
+                        fontSize: 20,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ),
-                  FontTextButton(
+                  FontCustomButton(
+                    onClick: _onParagraph,
+                    icon: Text(
+                      "P",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ),
+                  FontCustomButton(
                     onClick: _onH1,
-                    icon: "H1",
+                    icon: Text(
+                      "H1",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
-                  FontTextButton(
+                  FontCustomButton(
                     onClick: _onH2,
-                    icon: "H2",
+                    icon: Text(
+                      "H2",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
-                  FontTextButton(
+                  FontCustomButton(
                     onClick: _onH3,
-                    icon: "H3",
+                    icon: Text(
+                      "H3",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                   for (String color in widget.availableColors)
                     FontColorButton.fromColor(color, () => _onColor(color)),
@@ -311,7 +358,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                 ),
                 focusedBorder: UnderlineInputBorder(
                   borderSide: BorderSide(
-                    color: Colors.white,
+                    color: widget.editorDecoration.cursorColor,
                   ),
                 ),
               ),

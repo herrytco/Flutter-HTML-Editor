@@ -1,3 +1,9 @@
+## 0.0.7
+
+* changed style of editor buttons with InkWells for better UX
+* changed parsing behaviour to better support linebreaks in tags
+* added property to always show editor buttons if desired
+
 ## 0.0.6
 
 * added maxHeight property to the renderer to have a scrolling preview when the content exceeds the desired maximum height

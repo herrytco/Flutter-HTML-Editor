@@ -123,7 +123,9 @@ class RichtextRenderer extends StatelessWidget {
     int textLength = 0;
     bool full = false;
 
-    for (_TextNode node in flattenedNodes) {
+    for (int i = 0; i < flattenedNodes.length; i++) {
+      _TextNode node = flattenedNodes[i];
+
       String nodeText = node.text;
       if (maxLength != null && textLength + nodeText.length > maxLength!) {
         nodeText = nodeText.substring(
@@ -146,13 +148,17 @@ class RichtextRenderer extends StatelessWidget {
       );
       textLength += nodeText.length;
 
-      if (!ignoreLinebreaks && node.invokesNewline && tmp.length > 0) {
-        result.add(
-          RichText(
-            text: TextSpan(children: tmp),
-          ),
-        );
-        tmp = [];
+      if (!ignoreLinebreaks && tmp.length > 0) {
+        if (node.invokesNewline ||
+            (i + 1 < flattenedNodes.length &&
+                flattenedNodes[i + 1].invokesNewline)) {
+          result.add(
+            RichText(
+              text: TextSpan(children: tmp),
+            ),
+          );
+          tmp = [];
+        }
       }
 
       if (full) break;
