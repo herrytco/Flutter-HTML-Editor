@@ -1,3 +1,8 @@
+## 0.0.8
+
+* Extracted Parsing into its own class where context is stored in the class' instance variables
+* Fixed a parsing problem on nested strings
+
 ## 0.0.7
 
 * changed style of editor buttons with InkWells for better UX

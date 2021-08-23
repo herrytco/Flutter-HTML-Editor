@@ -61,6 +61,10 @@ class DocumentNode {
     return false;
   }
 
+  bool _nodeTagIsOneOf(List<String> taglist) {
+    return taglist.contains(this.scope.name);
+  }
+
   ///
   /// checks the path from the current node (including) to the root, if one of
   /// the following tags is present: "b", "h1", "h2", "h3"
@@ -118,8 +122,7 @@ class DocumentNode {
   ///
   /// If one of them is present, a newline will be created after the end-tag
   ///
-  bool get invokesNewline =>
-      _containsNodeRootPathAtLeastOneTag(["h1", "h2", "h3", "p"]);
+  bool get invokesNewline => _nodeTagIsOneOf(["h1", "h2", "h3", "p"]);
 
   ///
   /// checks the path from the current node (including) to the root, if either:
@@ -176,7 +179,7 @@ class DocumentNode {
       String nodeText = "";
       for (int j = 0; j < intend; j++) nodeText += " ";
 
-      nodeText += "<${scope.name}>${text[i]}</$scope.name>";
+      nodeText += "<${scope.name}>${text[i]}</${scope.name}>";
       print(nodeText);
 
       if (i < children.length) children[i].printNode(intend: intend + 2);

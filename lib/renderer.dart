@@ -1,7 +1,6 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/parser.dart';
+import 'package:light_html_editor/api/text_renderer.dart';
 import 'package:light_html_editor/editor.dart';
 import 'package:light_html_editor/placeholder.dart';
 import 'package:light_html_editor/data/renderer_properties.dart';
@@ -81,104 +80,18 @@ class RichtextRenderer extends StatelessWidget {
   }
 
   ///
-  /// converts a subtree into a list of [_TextNode], resulting into an in-order
-  /// flattening of the subtree.
-  ///
-  void _processNodeNew(DocumentNode node, List<_TextNode> result) {
-    for (int i = 0; i < node.text.length; i++) {
-      if (node.text[i].isNotEmpty)
-        result.add(
-          _TextNode(
-            node.text[i],
-            TextStyle(
-              fontSize: node.fontSize != null
-                  ? node.fontSize
-                  : rendererDecoration.defaultFontSize,
-              fontWeight: node.isBold ? FontWeight.bold : FontWeight.normal,
-              fontStyle: node.isItalics ? FontStyle.italic : FontStyle.normal,
-              color: node.textColor != null
-                  ? node.textColor
-                  : rendererDecoration.defaultColor,
-              decoration: node.underline,
-            ),
-            node.invokesNewline,
-          ),
-        );
-      if (i < node.children.length) _processNodeNew(node.children[i], result);
-    }
-  }
-
-  ///
   /// Transforms the written text into an in-order representation which then gets
   /// further processed into a list of [RichText] to display.
   ///
   List<RichText> _renderText() {
-    List<RichText> result = [];
-
-    List<_TextNode> flattenedNodes = [];
-    if (root != null) _processNodeNew(root!, flattenedNodes);
-
-    List<TextSpan> tmp = [TextSpan(text: "")];
-
-    int textLength = 0;
-    bool full = false;
-
-    for (int i = 0; i < flattenedNodes.length; i++) {
-      _TextNode node = flattenedNodes[i];
-
-      String nodeText = node.text;
-      if (maxLength != null && textLength + nodeText.length > maxLength!) {
-        nodeText = nodeText.substring(
-                0, min(maxLength! - textLength, nodeText.length)) +
-            "...";
-        full = true;
-      }
-
-      nodeText = Parser().replaceVariables(
-        nodeText,
-        placeholders: placeholders,
-        placeholderMarker: placeholderMarker,
-      );
-
-      tmp.add(
-        TextSpan(
-          text: nodeText,
-          style: node.style,
-        ),
-      );
-      textLength += nodeText.length;
-
-      if (!ignoreLinebreaks && tmp.length > 0) {
-        if (node.invokesNewline ||
-            (i + 1 < flattenedNodes.length &&
-                flattenedNodes[i + 1].invokesNewline)) {
-          result.add(
-            RichText(
-              text: TextSpan(children: tmp),
-            ),
-          );
-          tmp = [];
-        }
-      }
-
-      if (full) break;
-    }
-
-    if (tmp.length > 0)
-      result.add(
-        RichText(
-          text: TextSpan(children: tmp),
-        ),
-      );
-
-    if (result.length == 0)
-      result.add(
-        RichText(
-          text: TextSpan(text: ""),
-        ),
-      );
-
-    return result;
+    return TextRenderer(
+      root!,
+      rendererDecoration,
+      maxLength,
+      placeholders,
+      placeholderMarker,
+      ignoreLinebreaks,
+    ).paragraphs;
   }
 
   @override
@@ -238,16 +151,4 @@ class RichtextRenderer extends StatelessWidget {
       ),
     );
   }
-}
-
-///
-/// representation of a single node with a corresponding [TextStyle] and if the
-/// node invokes a linebreak after it
-///
-class _TextNode {
-  final String text;
-  final TextStyle style;
-  final bool invokesNewline;
-
-  _TextNode(this.text, this.style, this.invokesNewline);
 }
