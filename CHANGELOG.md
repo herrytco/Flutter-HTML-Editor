@@ -1,3 +1,7 @@
+## 0.0.9
+
+* Bugfix where some initial empty space was shown
+
 ## 0.0.8
 
 * Extracted Parsing into its own class where context is stored in the class' instance variables

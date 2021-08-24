@@ -34,7 +34,7 @@ class TextRenderer {
   List<_TextNode> _flattenedNodes = [];
 
   /// current paragraph - will become one [RichText] in the final result
-  List<TextSpan> _currentParagraph = [TextSpan(text: "")];
+  List<TextSpan> _currentParagraph = [];
 
   /// all currently rendered paragraphs
   List<RichText> _paragraphs = [];
@@ -75,14 +75,7 @@ class TextRenderer {
 
       // linebreak before the new text
       if (!ignoreLinebreaks && _currentParagraph.length > 0) {
-        if (node.invokesNewlineBefore) {
-          paragraphs.add(
-            RichText(
-              text: TextSpan(children: _currentParagraph),
-            ),
-          );
-          _currentParagraph = [];
-        }
+        if (node.invokesNewlineBefore) _performLinebreak();
       }
 
       _currentParagraph.add(
@@ -95,14 +88,7 @@ class TextRenderer {
 
       // linebreak before the new text
       if (!ignoreLinebreaks && _currentParagraph.length > 0) {
-        if (node.invokesNewlineAfter) {
-          paragraphs.add(
-            RichText(
-              text: TextSpan(children: _currentParagraph),
-            ),
-          );
-          _currentParagraph = [];
-        }
+        if (node.invokesNewlineAfter) _performLinebreak();
       }
 
       if (full) break;
@@ -121,6 +107,16 @@ class TextRenderer {
           text: TextSpan(text: ""),
         ),
       );
+  }
+
+  void _performLinebreak() {
+    if (_currentParagraph.length > 0)
+      paragraphs.add(
+        RichText(
+          text: TextSpan(children: _currentParagraph),
+        ),
+      );
+    _currentParagraph = [];
   }
 
   ///
