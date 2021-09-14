@@ -9,6 +9,8 @@ class RendererDecoration {
   final double defaultFontSize;
   final EdgeInsets padding;
   final double? maxHeight;
+  final Color? linkColor;
+  final bool? linkUnderline;
 
   const RendererDecoration({
     this.border,
@@ -18,5 +20,7 @@ class RendererDecoration {
     this.defaultFontSize = TextConstants.defaultFontSize,
     this.padding = const EdgeInsets.all(8),
     this.maxHeight,
+    this.linkColor,
+    this.linkUnderline,
   });
 }

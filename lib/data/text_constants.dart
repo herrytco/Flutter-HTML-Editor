@@ -7,6 +7,11 @@ class TextConstants {
   /// color used if no color is specified
   static const Color defaultColor = Colors.black;
 
+  /// link underline when no override was provided
+  static const TextDecoration defaultLinkUnderline = TextDecoration.underline;
+
+  static const Color defaultLinkColor = Colors.blue;
+
   /// available header tags
   static const List<String> headers = const ["h1", "h2", "h3"];
 

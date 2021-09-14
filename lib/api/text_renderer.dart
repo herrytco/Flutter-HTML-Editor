@@ -1,10 +1,13 @@
 import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/parser.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/data/renderer_properties.dart';
+import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/light_html_editor.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 ///
 /// Used to conver the tree of [DocumentNode] nodes into a list of [RichText]
@@ -78,10 +81,24 @@ class TextRenderer {
         if (node.invokesNewlineBefore) _performLinebreak();
       }
 
+      GestureRecognizer? linkTapRecognizer;
+
+      if (node.linkTarget != null) {
+        linkTapRecognizer = TapGestureRecognizer()
+          ..onTap = () {
+            if (node.linkTarget != null) {
+              launch(
+                node.linkTarget!,
+              );
+            }
+          };
+      }
+
       _currentParagraph.add(
         TextSpan(
           text: nodeText,
           style: node.style,
+          recognizer: linkTapRecognizer,
         ),
       );
       textLength += nodeText.length;
@@ -120,6 +137,40 @@ class TextRenderer {
   }
 
   ///
+  /// returns the underline-value for this node. checks first if the node is
+  /// descendant of a link-node and looks for <u> tags afterwards
+  ///
+  TextDecoration _underline(DocumentNode node) {
+    if (node.isLink) {
+      if (rendererDecoration.linkUnderline != null)
+        return rendererDecoration.linkUnderline!
+            ? TextConstants.defaultLinkUnderline
+            : TextDecoration.none;
+      else
+        return TextConstants.defaultLinkUnderline;
+    }
+
+    return node.underline;
+  }
+
+  ///
+  /// returns the underline-value for this node. checks first if the node is
+  /// descendant of a link-node and looks for <u> tags afterwards
+  ///
+  Color _color(DocumentNode node) {
+    if (node.isLink) {
+      if (rendererDecoration.linkColor != null)
+        return rendererDecoration.linkColor!;
+      else
+        return TextConstants.defaultLinkColor;
+    }
+
+    return node.textColor != null
+        ? node.textColor!
+        : rendererDecoration.defaultColor;
+  }
+
+  ///
   /// converts a subtree into a list of [_TextNode], resulting into an in-order
   /// flattening of the subtree.
   ///
@@ -135,19 +186,16 @@ class TextRenderer {
                   : rendererDecoration.defaultFontSize,
               fontWeight: node.isBold ? FontWeight.bold : FontWeight.normal,
               fontStyle: node.isItalics ? FontStyle.italic : FontStyle.normal,
-              color: node.textColor != null
-                  ? node.textColor
-                  : rendererDecoration.defaultColor,
-              decoration: node.underline,
+              color: _color(node),
+              decoration: _underline(node),
             ),
             node.invokesNewline && (i == 0),
             node.invokesNewline && (i == node.text.length - 1),
+            node.linkTarget,
           ),
         );
       }
-      if (i < node.children.length) {
-        _proccessNode(node.children[i]);
-      }
+      if (i < node.children.length) _proccessNode(node.children[i]);
     }
   }
 }
@@ -161,7 +209,13 @@ class _TextNode {
   final TextStyle style;
   final bool invokesNewlineBefore;
   final bool invokesNewlineAfter;
+  final String? linkTarget;
 
-  _TextNode(this.text, this.style, this.invokesNewlineBefore,
-      this.invokesNewlineAfter);
+  _TextNode(
+    this.text,
+    this.style,
+    this.invokesNewlineBefore,
+    this.invokesNewlineAfter,
+    this.linkTarget,
+  );
 }

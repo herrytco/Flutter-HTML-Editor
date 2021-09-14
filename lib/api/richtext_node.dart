@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/api/regex_provider.dart';
 import 'package:light_html_editor/data/color_utils.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 
@@ -116,6 +117,24 @@ class DocumentNode {
     return null;
   }
 
+  String? get linkTarget {
+    DocumentNode? workingNode = this;
+
+    while (workingNode != null) {
+      if (workingNode.scope.name == "a" &&
+          workingNode.scope.properties.containsKey("href")) {
+        return workingNode.scope.properties["href"];
+      }
+
+      workingNode = workingNode.parent;
+    }
+
+    return null;
+  }
+
+  /// checks the path if at one element is "a"
+  bool get isLink => _containsNodeRootPathAtLeastOneTag(["a"]);
+
   ///
   /// checks the path from the current node (including) to the root, if one of
   /// the following tags is present: "h1", "h2", "h3", "p"
@@ -211,13 +230,6 @@ class Tag {
   /// the raw length of the tag for offset calculation
   final int rawTagLength;
 
-  /// matches supported HTML tags
-  static RegExp _startTagRegex =
-      RegExp(r'<[a-zA-Z0-9]+(\s+[a-zA-Z0-9\-]+(="[a-zA-Z0-9#:;\-]*")?)*\s*>');
-
-  /// matches supported end-tags
-  static RegExp _endTagRegex = RegExp("</[a-zA-Z0-9]+>");
-
   /// creates a new tag-representation. and decodes the "style" tag if present
   Tag(this.name, this.properties, this.isStart, this.rawTagLength) {
     if (properties.containsKey("style")) {
@@ -244,7 +256,7 @@ class Tag {
     String tagClean =
         tag.substring(1, tag.length - 1).replaceAll("\s+", " ").trim();
 
-    if (_startTagRegex.hasMatch(tag)) {
+    if (RegExProvider.startTagRegex.hasMatch(tag)) {
       List<String> tagParts = tagClean.split(" ");
 
       String tagName = tagParts[0];
@@ -263,7 +275,7 @@ class Tag {
       }
 
       return Tag(tagName, properties, true, tag.length);
-    } else if (_endTagRegex.hasMatch(tag)) {
+    } else if (RegExProvider.endTagRegex.hasMatch(tag)) {
       return Tag(tag.substring(2, tag.length - 1), {}, false, tag.length);
     }
 

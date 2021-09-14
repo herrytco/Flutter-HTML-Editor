@@ -9,6 +9,7 @@ import 'package:light_html_editor/renderer.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/data/renderer_properties.dart';
 import 'package:light_html_editor/data/text_constants.dart';
+import 'package:light_html_editor/ui/buttons/icon_button.dart';
 
 ///
 /// Lightweight HTML editor with optional preview function. Uses all width
@@ -232,6 +233,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
   void _onColor(String hex) =>
       _wrapWithStartAndEnd('<span style="color:$hex;">', '</span>');
 
+  void _onLink() => _wrapWithStartAndEnd('<a href="">', '</a>');
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -302,6 +305,10 @@ class _RichTextEditorState extends State<RichTextEditor> {
                         fontSize: 20,
                       ),
                     ),
+                  ),
+                  FontIconButton(
+                    Icons.link,
+                    onClick: _onLink,
                   ),
                   FontCustomButton(
                     onClick: _onH3,
