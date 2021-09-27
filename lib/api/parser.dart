@@ -1,3 +1,4 @@
+import 'package:light_html_editor/api/regex_provider.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/placeholder.dart';
 
@@ -6,17 +7,14 @@ import 'package:light_html_editor/placeholder.dart';
 /// of utility-methods like stripping tags from a text to access the tagless text
 ///
 class Parser {
-  /// matches supported HTML tags (start and end)
-  static RegExp _tagRegex = RegExp(
-      r'<\/?[a-zA-Z0-9]+(\s+[a-zA-Z0-9\-]+(="[a-zA-Z0-9#:;\-]*")?)*\s*>');
 
   /// remove all tags from a HTML-Richtext and return the raw, unformatted text
   String cleanTagsFromRichtext(String text) {
-    RegExpMatch? match = _tagRegex.firstMatch(text);
+    RegExpMatch? match = RegExProvider.tagRegex.firstMatch(text);
 
     while (match != null) {
       text = text.substring(0, match.start) + text.substring(match.end);
-      match = _tagRegex.firstMatch(text);
+      match = RegExProvider.tagRegex.firstMatch(text);
     }
 
     return text;
@@ -55,7 +53,7 @@ class Parser {
     String remainingText = text;
 
     while (remainingText.isNotEmpty) {
-      RegExpMatch? nextTagMatch = _tagRegex.firstMatch(remainingText);
+      RegExpMatch? nextTagMatch = RegExProvider.tagRegex.firstMatch(remainingText);
 
       if (nextTagMatch == null) {
         currentNode.text.add(remainingText);

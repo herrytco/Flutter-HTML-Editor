@@ -1,3 +1,9 @@
+## 0.0.10
+
+* Workaround for a Flutter bug concerning the TextSelection property of TextEditingController
+* Added link support
+* Added customizable indicator for overlong text in RichtextRenderer
+
 ## 0.0.9
 
 * Bugfix where some initial empty space was shown

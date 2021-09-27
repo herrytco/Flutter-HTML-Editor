@@ -14,18 +14,7 @@ class RichtextRenderer extends StatelessWidget {
   /// Creates a new instance of an HTML renderer. Takes the root of a parse-tree
   /// as an argument which gets displayed.
   ///
-  /// Displays an optional [label] at the bottom, styled by [labelStyle].
-  ///
-  /// The rendered text is padded by [padding].
-  ///
-  /// If a different font-size is wanted for text with unspecified font-size,
-  /// [defaultFontSize] can be adapted.
-  ///
-  /// If a different default-text-color is wanted for text with unspecified
-  /// text-color, [defaultColor] can be adapted.
-  ///
-  /// A border gets displayed around the rendered text per default, which can be
-  /// turned off by setting [hasBorder]
+  /// The widget can be styled by setting an appropriate [rendererDecoration].
   ///
   const RichtextRenderer({
     Key? key,
@@ -48,18 +37,7 @@ class RichtextRenderer extends StatelessWidget {
   /// Creates a new instance of an HTML renderer. Takes a richtext created by
   /// [RichTextEditor] as an argument which is parsed into a ParseTree
   ///
-  /// Displays an optional [label] at the bottom, styled by [labelStyle].
-  ///
-  /// The rendered text is padded by [padding].
-  ///
-  /// If a different font-size is wanted for text with unspecified font-size,
-  /// [defaultFontSize] can be adapted.
-  ///
-  /// If a different default-text-color is wanted for text with unspecified
-  /// text-color, [defaultColor] can be adapted.
-  ///
-  /// A border gets displayed around the rendered text per default, which can be
-  /// turned off by setting [hasBorder]
+  /// The widget can be styled by setting an appropriate [rendererDecoration].
   ///
   factory RichtextRenderer.fromRichtext(
     String richtext, {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 
-class RegularExample extends StatelessWidget {
-  const RegularExample({Key? key}) : super(key: key);
+class LinkExample extends StatelessWidget {
+  const LinkExample({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,8 @@ class RegularExample extends StatelessWidget {
               // do something with the richtext
             },
             alwaysShowButtons: true,
-            previewDecoration: RendererDecoration(overflowIndicator: "MORE"),
+            initialValue:
+                'Read more at <a href="https://www.google.at">Google</a>',
           ),
         ),
       ),
