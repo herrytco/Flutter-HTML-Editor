@@ -10,6 +10,7 @@ import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/data/renderer_properties.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/ui/buttons/icon_button.dart';
+import 'package:light_html_editor/ui/selectable_textfield.dart';
 
 ///
 /// Lightweight HTML editor with optional preview function. Uses all width
@@ -93,6 +94,9 @@ class _RichTextEditorState extends State<RichTextEditor> {
   /// handles visibility of editor-controls
   bool _areButtonsVisible = false;
 
+  // currently selected text
+  TextSelection? _selection;
+
   @override
   void initState() {
     _areButtonsVisible = widget.alwaysShowButtons;
@@ -127,10 +131,14 @@ class _RichTextEditorState extends State<RichTextEditor> {
   /// tag.
   ///
   void _wrapWithStartAndEnd(String startTag, String endTag) {
-    TextSelection selection = _textEditingController.selection;
+    TextSelection? selection = _selection;
 
-    int start = min(selection.baseOffset, selection.extentOffset);
-    int end = max(selection.baseOffset, selection.extentOffset);
+    int start = selection == null
+        ? -1
+        : min(selection.baseOffset, selection.extentOffset);
+    int end = selection == null
+        ? -1
+        : max(selection.baseOffset, selection.extentOffset);
 
     String before = _textEditingController.text;
     String after;
@@ -193,6 +201,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
         extentOffset: "$a$startTag$b".length,
       );
     }
+
+    _selection = _textEditingController.selection;
   }
 
   ///
@@ -306,10 +316,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
                       ),
                     ),
                   ),
-                  FontIconButton(
-                    Icons.link,
-                    onClick: _onLink,
-                  ),
                   FontCustomButton(
                     onClick: _onH3,
                     icon: Text(
@@ -319,6 +325,10 @@ class _RichTextEditorState extends State<RichTextEditor> {
                       ),
                     ),
                   ),
+                  FontIconButton(
+                    Icons.link,
+                    onClick: _onLink,
+                  ),
                   for (String color in widget.availableColors)
                     FontColorButton.fromColor(color, () => _onColor(color)),
                 ],
@@ -326,51 +336,12 @@ class _RichTextEditorState extends State<RichTextEditor> {
             ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextFormField(
-              buildCounter: (
-                context, {
-                int? currentLength,
-                bool? isFocused,
-                int? maxLength,
-              }) {
-                if (currentLength != null && widget.maxLength != null)
-                  return Text(
-                    "$currentLength/${widget.maxLength}",
-                    style: widget.editorDecoration.labelStyle,
-                  );
-
-                if (currentLength != null)
-                  return Text(
-                    "$currentLength",
-                    style: widget.editorDecoration.labelStyle,
-                  );
-
-                return SizedBox();
-              },
-              controller: _textEditingController,
-              focusNode: _focusNode,
-              minLines: 1,
-              maxLines: 8,
+            child: SelectableTextfield(
+              widget.editorDecoration,
+              _textEditingController,
+              (TextSelection selection) => _selection = selection,
+              _focusNode,
               maxLength: widget.maxLength,
-              maxLengthEnforcement: MaxLengthEnforcement.enforced,
-              decoration: InputDecoration(
-                labelText: widget.editorDecoration.editorLabel,
-                labelStyle: _focusNode.hasFocus
-                    ? widget.editorDecoration.focusedLabelStyle
-                    : widget.editorDecoration.labelStyle,
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Theme.of(context).primaryColor,
-                  ),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(
-                    color: widget.editorDecoration.cursorColor,
-                  ),
-                ),
-              ),
-              cursorColor: widget.editorDecoration.cursorColor,
-              style: widget.editorDecoration.inputStyle,
             ),
           ),
           if (widget.showPreview)

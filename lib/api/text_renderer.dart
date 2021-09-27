@@ -66,7 +66,7 @@ class TextRenderer {
       if (maxLength != null && textLength + nodeText.length > maxLength!) {
         nodeText = nodeText.substring(
                 0, min(maxLength! - textLength, nodeText.length)) +
-            "...";
+            rendererDecoration.overflowIndicator;
         full = true;
       }
 
@@ -84,13 +84,11 @@ class TextRenderer {
       GestureRecognizer? linkTapRecognizer;
 
       if (node.linkTarget != null) {
+        final String target = node.linkTarget!;
+
         linkTapRecognizer = TapGestureRecognizer()
           ..onTap = () {
-            if (node.linkTarget != null) {
-              launch(
-                node.linkTarget!,
-              );
-            }
+            launch(target);
           };
       }
 
@@ -218,4 +216,9 @@ class _TextNode {
     this.invokesNewlineAfter,
     this.linkTarget,
   );
+
+  @override
+  String toString() {
+    return "TextNode($text, $linkTarget)";
+  }
 }

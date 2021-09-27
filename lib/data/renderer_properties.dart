@@ -1,6 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 
+///
+/// collection of style properties for the RichtextRenderer
+///
 class RendererDecoration {
   final BoxBorder? border;
   final String? label;
@@ -12,6 +15,9 @@ class RendererDecoration {
   final Color? linkColor;
   final bool? linkUnderline;
 
+  /// displayed at the end of a shortened message due to length limits
+  final String overflowIndicator;
+
   const RendererDecoration({
     this.border,
     this.label,
@@ -22,5 +28,6 @@ class RendererDecoration {
     this.maxHeight,
     this.linkColor,
     this.linkUnderline,
+    this.overflowIndicator = "...",
   });
 }
