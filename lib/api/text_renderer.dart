@@ -24,6 +24,9 @@ class TextRenderer {
   /// characters (tags excluded)
   final int? maxLength;
 
+  /// optional maximum number of lines to be displayed
+  final int? maxLines;
+
   /// variables used in the text
   final List<RichTextPlaceholder> placeholders;
 
@@ -40,16 +43,33 @@ class TextRenderer {
   List<TextSpan> _currentParagraph = [];
 
   /// all currently rendered paragraphs
-  List<RichText> _paragraphs = [];
+  List<List<TextSpan>> _paragraphs = [];
 
   /// displayable widgets
-  List<RichText> get paragraphs => _paragraphs;
+  RichText get paragraphs {
+    List<TextSpan> content = [];
+
+    for (List<TextSpan> line in _paragraphs) {
+      for (TextSpan part in line) content.add(part);
+
+      if (_paragraphs.indexOf(line) < _paragraphs.length - 1)
+        content.add(TextSpan(text: "\n"));
+    }
+
+    return RichText(
+      maxLines: maxLines,
+      text: TextSpan(
+        children: content,
+      ),
+    );
+  }
 
   /// recursively parses the richtext-tree
   TextRenderer(
     this.root,
     this.rendererDecoration,
     this.maxLength,
+    this.maxLines,
     this.placeholders,
     this.placeholderMarker,
     this.ignoreLinebreaks,
@@ -109,28 +129,11 @@ class TextRenderer {
       if (full) break;
     }
 
-    if (_currentParagraph.length > 0)
-      paragraphs.add(
-        RichText(
-          text: TextSpan(children: _currentParagraph),
-        ),
-      );
-
-    if (paragraphs.length == 0)
-      paragraphs.add(
-        RichText(
-          text: TextSpan(text: ""),
-        ),
-      );
+    _performLinebreak();
   }
 
   void _performLinebreak() {
-    if (_currentParagraph.length > 0)
-      paragraphs.add(
-        RichText(
-          text: TextSpan(children: _currentParagraph),
-        ),
-      );
+    if (_currentParagraph.length > 0) _paragraphs.add(_currentParagraph);
     _currentParagraph = [];
   }
 

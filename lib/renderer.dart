@@ -16,18 +16,27 @@ class RichtextRenderer extends StatelessWidget {
   ///
   /// The widget can be styled by setting an appropriate [rendererDecoration].
   ///
-  const RichtextRenderer({
+  RichtextRenderer({
     Key? key,
     @required this.root,
     this.maxLength,
+    this.maxLines,
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
     this.rendererDecoration = const RendererDecoration(),
     this.ignoreLinebreaks = false,
-  }) : super(key: key);
+  }) : super(key: key) {
+    if (maxLines != null && maxLength != null)
+      throw Exception(
+          "maxLines and maxLength must not be != null at the sime time!");
+  }
 
   final DocumentNode? root;
   final int? maxLength;
+
+  /// optional maximum number of lines to be displayed.
+  final int? maxLines;
+
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
   final RendererDecoration rendererDecoration;
@@ -42,6 +51,7 @@ class RichtextRenderer extends StatelessWidget {
   factory RichtextRenderer.fromRichtext(
     String richtext, {
     int? maxLength,
+    int? maxLines,
     RendererDecoration rendererDecoration = const RendererDecoration(),
     bool ignoreLinebreaks = false,
     String placeholderMarker = "\\\$",
@@ -50,26 +60,12 @@ class RichtextRenderer extends StatelessWidget {
     return RichtextRenderer(
       root: Parser().parse(richtext),
       maxLength: maxLength,
+      maxLines: maxLines,
       rendererDecoration: rendererDecoration,
       ignoreLinebreaks: ignoreLinebreaks,
       placeholderMarker: placeholderMarker,
       placeholders: placeholders,
     );
-  }
-
-  ///
-  /// Transforms the written text into an in-order representation which then gets
-  /// further processed into a list of [RichText] to display.
-  ///
-  List<RichText> _renderText() {
-    return TextRenderer(
-      root!,
-      rendererDecoration,
-      maxLength,
-      placeholders,
-      placeholderMarker,
-      ignoreLinebreaks,
-    ).paragraphs;
   }
 
   @override
@@ -98,22 +94,15 @@ class RichtextRenderer extends StatelessWidget {
                       root!.children.length == 0 &&
                       root!.text.length == 0
                   ? SizedBox()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: _renderText()
-                          .map(
-                            (RichText line) => Container(
-                              child: line,
-                              // decoration: BoxDecoration(
-                              //   border: Border.all(
-                              //     color: Colors.black,
-                              //   ),
-                              // ),
-                            ),
-                          )
-                          .toList(),
-                    ),
+                  : TextRenderer(
+                      root!,
+                      rendererDecoration,
+                      maxLength,
+                      maxLines,
+                      placeholders,
+                      placeholderMarker,
+                      ignoreLinebreaks,
+                    ).paragraphs,
             ),
           ),
           if (rendererDecoration.label != null &&

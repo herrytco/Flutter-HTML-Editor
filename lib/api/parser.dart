@@ -7,7 +7,6 @@ import 'package:light_html_editor/placeholder.dart';
 /// of utility-methods like stripping tags from a text to access the tagless text
 ///
 class Parser {
-
   /// remove all tags from a HTML-Richtext and return the raw, unformatted text
   String cleanTagsFromRichtext(String text) {
     RegExpMatch? match = RegExProvider.tagRegex.firstMatch(text);
@@ -53,7 +52,8 @@ class Parser {
     String remainingText = text;
 
     while (remainingText.isNotEmpty) {
-      RegExpMatch? nextTagMatch = RegExProvider.tagRegex.firstMatch(remainingText);
+      RegExpMatch? nextTagMatch =
+          RegExProvider.tagRegex.firstMatch(remainingText);
 
       if (nextTagMatch == null) {
         currentNode.text.add(remainingText);

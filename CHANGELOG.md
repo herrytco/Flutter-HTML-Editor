@@ -1,3 +1,12 @@
+## 0.0.12
+
+* Added ```maxLines``` property to control not only the length but also the maximum number of displayed lines
+* Removed old linebreak system which worked with ```Column()``` and introduced RichText linebreaks.
+
+## 0.0.11
+
+* Workaround for a Flutter bug concerning the TextSelection property of TextEditingController
+
 ## 0.0.10
 
 * Workaround for a Flutter bug concerning the TextSelection property of TextEditingController
