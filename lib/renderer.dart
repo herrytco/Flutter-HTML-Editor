@@ -89,21 +89,19 @@ class RichtextRenderer extends StatelessWidget {
                   ? rendererDecoration.maxHeight!
                   : double.infinity,
             ),
-            child: SingleChildScrollView(
-              child: root != null &&
-                      root!.children.length == 0 &&
-                      root!.text.length == 0
-                  ? SizedBox()
-                  : TextRenderer(
-                      root!,
-                      rendererDecoration,
-                      maxLength,
-                      maxLines,
-                      placeholders,
-                      placeholderMarker,
-                      ignoreLinebreaks,
-                    ).paragraphs,
-            ),
+            child: root != null &&
+                    root!.children.length == 0 &&
+                    root!.text.length == 0
+                ? SizedBox()
+                : TextRenderer(
+                    root!,
+                    rendererDecoration,
+                    maxLength,
+                    maxLines,
+                    placeholders,
+                    placeholderMarker,
+                    ignoreLinebreaks,
+                  ).paragraphs,
           ),
           if (rendererDecoration.label != null &&
               rendererDecoration.label!.isNotEmpty)

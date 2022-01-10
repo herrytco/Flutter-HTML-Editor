@@ -1,15 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:light_html_editor/button_row.dart';
 import 'package:light_html_editor/placeholder.dart';
-import 'package:light_html_editor/ui/buttons/color_button.dart';
-import 'package:light_html_editor/ui/buttons/custom_button.dart';
 import 'package:light_html_editor/renderer.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/data/renderer_properties.dart';
 import 'package:light_html_editor/data/text_constants.dart';
-import 'package:light_html_editor/ui/buttons/icon_button.dart';
 import 'package:light_html_editor/ui/selectable_textfield.dart';
 
 ///
@@ -97,15 +94,20 @@ class _RichTextEditorState extends State<RichTextEditor> {
   // currently selected text
   TextSelection? _selection;
 
+  ScrollController _previewScrollController = ScrollController();
+
   @override
   void initState() {
     _areButtonsVisible = widget.alwaysShowButtons;
 
+    // use external controller, if provided
     if (widget.controller != null) _textEditingController = widget.controller!;
 
+    // copy in initial value if provided
     if (_textEditingController.text.isEmpty)
       _textEditingController.text = widget.initialValue ?? "";
 
+    // initialize event handler for hiding buttons
     if (!widget.alwaysShowButtons)
       _focusNode.addListener(() {
         setState(() {
@@ -113,10 +115,45 @@ class _RichTextEditorState extends State<RichTextEditor> {
         });
       });
 
+    // initialize event handler for new input
     _textEditingController.addListener(() {
       setState(() {});
 
       widget.onChanged(_textEditingController.text);
+
+      // get last character
+      int position = _textEditingController.selection.extentOffset;
+
+      if (position > 0) {
+        String lastChar = _textEditingController
+            .text[_textEditingController.selection.extentOffset - 1];
+
+        if (lastChar == "\n" || true) {
+          List<String> lines = _textEditingController.text.split("\n");
+          int buffer = 0, lineIndex = -1;
+
+          for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+
+            buffer += line.length + 1;
+
+            if (buffer > position) {
+              lineIndex = i;
+              break;
+            }
+          }
+
+          if (lineIndex > 0) {
+            double scrollAmount = lineIndex / (lines.length - 1);
+
+            _previewScrollController.animateTo(
+              _previewScrollController.position.maxScrollExtent * scrollAmount,
+              duration: Duration(milliseconds: 200),
+              curve: Curves.fastOutSlowIn,
+            );
+          }
+        }
+      }
     });
     super.initState();
   }
@@ -218,142 +255,51 @@ class _RichTextEditorState extends State<RichTextEditor> {
     _wrapWithStartAndEnd(startTag, endTag);
   }
 
-  /// wraps the current selection with <b></b>
-  void _onBold() => _wrapWithTag("b");
-
-  /// wraps the current selection with <i></i>
-  void _onItalics() => _wrapWithTag("i");
-
-  /// wraps the current selection with <u></u>
-  void _onUnderline() => _wrapWithTag("u");
-
-  /// wraps the current selection with <p></p>
-  void _onParagraph() => _wrapWithTag("p");
-
-  /// wraps the current selection with <h1></h1>
-  void _onH1() => _wrapWithTag("h1");
-
-  /// wraps the current selection with <h2></h2>
-  void _onH2() => _wrapWithTag("h2");
-
-  /// wraps the current selection with <h3></h3>
-  void _onH3() => _wrapWithTag("h3");
-
-  /// wraps the current selection with <span style="color:[hex]"></span>
-  void _onColor(String hex) =>
-      _wrapWithStartAndEnd('<span style="color:$hex;">', '</span>');
-
-  void _onLink() => _wrapWithStartAndEnd('<a href="">', '</a>');
-
   @override
   Widget build(BuildContext context) {
     return Container(
       color: widget.editorDecoration.backgroundColor,
       width: double.infinity,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           if (_areButtonsVisible)
-            Container(
-              padding: const EdgeInsets.only(left: 4, right: 4, top: 4),
-              width: double.infinity,
-              child: Wrap(
-                children: [
-                  FontCustomButton(
-                    onClick: _onBold,
-                    icon: Text(
-                      "B",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  FontCustomButton(
-                    onClick: _onItalics,
-                    icon: Text(
-                      "I",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                  FontCustomButton(
-                    onClick: _onUnderline,
-                    icon: Text(
-                      "U",
-                      style: TextStyle(
-                        fontSize: 20,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                  FontCustomButton(
-                    onClick: _onParagraph,
-                    icon: Text(
-                      "P",
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  FontCustomButton(
-                    onClick: _onH1,
-                    icon: Text(
-                      "H1",
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  FontCustomButton(
-                    onClick: _onH2,
-                    icon: Text(
-                      "H2",
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  FontCustomButton(
-                    onClick: _onH3,
-                    icon: Text(
-                      "H3",
-                      style: TextStyle(
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  FontIconButton(
-                    Icons.link,
-                    onClick: _onLink,
-                  ),
-                  for (String color in widget.availableColors)
-                    FontColorButton.fromColor(color, () => _onColor(color)),
-                ],
-              ),
+            ButtonRow(
+              _wrapWithTag,
+              _wrapWithStartAndEnd,
+              widget.availableColors,
             ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SelectableTextfield(
-              widget.editorDecoration,
-              _textEditingController,
-              (TextSelection selection) => _selection = selection,
-              _focusNode,
-              maxLength: widget.maxLength,
+          Expanded(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SelectableTextfield(
+                      widget.editorDecoration,
+                      _textEditingController,
+                      (TextSelection selection) => _selection = selection,
+                      _focusNode,
+                      maxLength: widget.maxLength,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: _previewScrollController,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: RichtextRenderer.fromRichtext(
+                        _textEditingController.text,
+                        rendererDecoration: widget.previewDecoration,
+                        placeholders: widget.placeholders,
+                        placeholderMarker: widget.placeholderMarker,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          if (widget.showPreview)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: RichtextRenderer.fromRichtext(
-                _textEditingController.text,
-                rendererDecoration: widget.previewDecoration,
-                placeholders: widget.placeholders,
-                placeholderMarker: widget.placeholderMarker,
-              ),
-            ),
         ],
       ),
     );

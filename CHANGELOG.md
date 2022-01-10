@@ -1,6 +1,12 @@
+## 0.0.13
+
+* Added ```maxLines``` property (to the Editor) to control how large the textfield can grow (null as default for infinite lines)
+* Refactoring, extracted button row into its own component
+* Widget takes all available height now
+
 ## 0.0.12
 
-* Added ```maxLines``` property to control not only the length but also the maximum number of displayed lines
+* Added ```maxLines``` property (to the Renderer) to control not only the length but also the maximum number of displayed lines
 * Removed old linebreak system which worked with ```Column()``` and introduced RichText linebreaks.
 
 ## 0.0.11

@@ -76,7 +76,7 @@ class _SelectableTextfieldState extends State<SelectableTextfield> {
       controller: widget.controller,
       focusNode: widget.focusNode,
       minLines: 1,
-      maxLines: 8,
+      maxLines: widget.editorDecoration.maxLines,
       maxLength: widget.maxLength,
       maxLengthEnforcement: MaxLengthEnforcement.enforced,
       decoration: InputDecoration(

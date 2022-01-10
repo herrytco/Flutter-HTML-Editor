@@ -8,6 +8,7 @@ class EditorDecoration {
   final TextStyle inputStyle;
   final TextStyle labelStyle;
   final TextStyle focusedLabelStyle;
+  final int? maxLines;
 
   const EditorDecoration({
     this.editorLabel,
@@ -16,5 +17,6 @@ class EditorDecoration {
     this.inputStyle = TextConstants.labelStyle,
     this.labelStyle = TextConstants.labelStyle,
     this.focusedLabelStyle = TextConstants.labelStyle,
+    this.maxLines,
   });
 }
