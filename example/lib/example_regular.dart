@@ -10,7 +10,6 @@ class RegularExample extends StatelessWidget {
       backgroundColor: Colors.grey,
       body: Center(
         child: SizedBox(
-          width: 400,
           child: RichTextEditor(
             placeholders: [
               RichTextPlaceholder(

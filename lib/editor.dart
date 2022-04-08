@@ -256,7 +256,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
   Widget build(BuildContext context) {
     return Container(
       color: widget.editorDecoration.backgroundColor,
-      height: widget.size.height,
       width: double.infinity,
       child: Column(
         children: [
@@ -286,10 +285,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
                         height: 8.0,
                       ),
                       Container(
-                        constraints: BoxConstraints(
-                            maxHeight: widget.size.height + 50,
-                            minHeight: widget.size.height,
-                            maxWidth: 659),
+                        constraints:
+                            BoxConstraints(minHeight: widget.size.height),
                         padding: const EdgeInsets.symmetric(
                           vertical: 8.0,
                           horizontal: 8.0,
@@ -329,10 +326,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
                         SingleChildScrollView(
                           controller: _previewScrollController,
                           child: Container(
-                            constraints: BoxConstraints(
-                                maxHeight: widget.size.height + 50,
-                                minHeight: widget.size.height,
-                                maxWidth: 659),
+                            constraints:
+                                BoxConstraints(minHeight: widget.size.height),
                             padding: const EdgeInsets.symmetric(
                                 vertical: 8.0, horizontal: 8.0),
                             decoration: BoxDecoration(
