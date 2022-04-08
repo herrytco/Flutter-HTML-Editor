@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/button_row.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
-import 'package:light_html_editor/data/renderer_properties.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/placeholder.dart';
 import 'package:light_html_editor/renderer.dart';
@@ -53,10 +52,6 @@ class RichTextEditor extends StatefulWidget {
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
     this.onChanged = RichTextEditor._doNothingWithResult,
-    this.previewDecoration = const RendererDecoration(
-      label: "Preview",
-      labelStyle: TextConstants.labelStyle,
-    ),
     this.editorDecoration = const EditorDecoration(),
     this.availableColors = TextConstants.defaultColors,
     this.alwaysShowButtons = false,
@@ -73,7 +68,6 @@ class RichTextEditor extends StatefulWidget {
   final TextEditingController? controller;
   final bool alwaysShowButtons;
 
-  final RendererDecoration previewDecoration;
   final EditorDecoration editorDecoration;
 
   final Function(String) onChanged;
@@ -339,7 +333,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
                             ),
                             child: RichtextRenderer.fromRichtext(
                               _textEditingController.text,
-                              rendererDecoration: widget.previewDecoration,
                               placeholders: widget.placeholders,
                               placeholderMarker: widget.placeholderMarker,
                             ),
