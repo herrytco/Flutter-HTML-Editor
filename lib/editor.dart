@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/button_row.dart';
-import 'package:light_html_editor/placeholder.dart';
-import 'package:light_html_editor/renderer.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/data/renderer_properties.dart';
 import 'package:light_html_editor/data/text_constants.dart';
+import 'package:light_html_editor/placeholder.dart';
+import 'package:light_html_editor/renderer.dart';
 import 'package:light_html_editor/ui/selectable_textfield.dart';
 
 ///
@@ -45,6 +45,7 @@ class RichTextEditor extends StatefulWidget {
   ///
   const RichTextEditor({
     Key? key,
+    this.textStyle,
     this.showPreview = true,
     this.showHeaderButton = true,
     this.initialValue,
@@ -61,7 +62,7 @@ class RichTextEditor extends StatefulWidget {
     this.alwaysShowButtons = false,
     this.controller,
   }) : super(key: key);
-
+  final TextStyle? textStyle;
   final bool showPreview;
   final bool showHeaderButton;
   final String? initialValue;
@@ -269,34 +270,84 @@ class _RichTextEditorState extends State<RichTextEditor> {
               widget.availableColors,
             ),
           Expanded(
-            child: Column(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SelectableTextfield(
-                      widget.editorDecoration,
-                      _textEditingController,
-                      (TextSelection selection) => _selection = selection,
-                      _focusNode,
-                      maxLength: widget.maxLength,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _previewScrollController,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: RichtextRenderer.fromRichtext(
-                        _textEditingController.text,
-                        rendererDecoration: widget.previewDecoration,
-                        placeholders: widget.placeholders,
-                        placeholderMarker: widget.placeholderMarker,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Content",
+                        style: widget.textStyle,
                       ),
-                    ),
+                      SizedBox(
+                        height: 4.0,
+                      ),
+                      Container(
+                        constraints: BoxConstraints(
+                            maxHeight: 445, minHeight: 60, maxWidth: 659),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8.0,
+                          horizontal: 8.0,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4.0),
+                          border: Border.all(
+                            color: Theme.of(context).primaryColor,
+                          ),
+                        ),
+                        child: SelectableTextfield(
+                          widget.editorDecoration,
+                          _textEditingController,
+                          (TextSelection selection) => _selection = selection,
+                          _focusNode,
+                          maxLength: widget.maxLength,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                SizedBox(
+                  width: 4.0,
+                ),
+                if (widget.showPreview)
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Preview",
+                          style: widget.textStyle,
+                        ),
+                        SizedBox(
+                          height: 4.0,
+                        ),
+                        SingleChildScrollView(
+                          controller: _previewScrollController,
+                          child: Container(
+                            constraints: BoxConstraints(
+                                maxHeight: 445, minHeight: 60, maxWidth: 659),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 8.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4.0),
+                              border: Border.all(
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            child: RichtextRenderer.fromRichtext(
+                              _textEditingController.text,
+                              rendererDecoration: widget.previewDecoration,
+                              placeholders: widget.placeholders,
+                              placeholderMarker: widget.placeholderMarker,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
               ],
             ),
           ),

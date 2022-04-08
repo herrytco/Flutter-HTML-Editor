@@ -75,25 +75,18 @@ class _SelectableTextfieldState extends State<SelectableTextfield> {
       },
       controller: widget.controller,
       focusNode: widget.focusNode,
-      minLines: 1,
-      maxLines: widget.editorDecoration.maxLines,
-      maxLength: widget.maxLength,
-      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
         labelText: widget.editorDecoration.editorLabel,
         labelStyle: widget.focusNode.hasFocus
             ? widget.editorDecoration.focusedLabelStyle
             : widget.editorDecoration.labelStyle,
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: widget.editorDecoration.cursorColor,
-          ),
-        ),
+        enabledBorder: InputBorder.none,
+        isDense: true,
+        focusedBorder: InputBorder.none,
+        counterText: "",
+        contentPadding: EdgeInsets.symmetric(vertical: 14.0),
       ),
       cursorColor: widget.editorDecoration.cursorColor,
       style: widget.editorDecoration.inputStyle,
