@@ -44,6 +44,7 @@ class RichTextEditor extends StatefulWidget {
   ///
   const RichTextEditor({
     Key? key,
+    this.size = const Size(500, 600),
     this.textStyle,
     this.showPreview = true,
     this.showHeaderButton = true,
@@ -61,6 +62,7 @@ class RichTextEditor extends StatefulWidget {
   final bool showPreview;
   final bool showHeaderButton;
   final String? initialValue;
+  final Size size;
   final int? maxLength;
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
@@ -254,6 +256,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
   Widget build(BuildContext context) {
     return Container(
       color: widget.editorDecoration.backgroundColor,
+      height: widget.size.height,
       width: double.infinity,
       child: Column(
         children: [
@@ -263,6 +266,9 @@ class _RichTextEditorState extends State<RichTextEditor> {
               _wrapWithStartAndEnd,
               widget.availableColors,
             ),
+          SizedBox(
+            height: 8.0,
+          ),
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,11 +283,13 @@ class _RichTextEditorState extends State<RichTextEditor> {
                         style: widget.textStyle,
                       ),
                       SizedBox(
-                        height: 4.0,
+                        height: 8.0,
                       ),
                       Container(
                         constraints: BoxConstraints(
-                            maxHeight: 445, minHeight: 60, maxWidth: 659),
+                            maxHeight: widget.size.height + 50,
+                            minHeight: widget.size.height,
+                            maxWidth: 659),
                         padding: const EdgeInsets.symmetric(
                           vertical: 8.0,
                           horizontal: 8.0,
@@ -304,7 +312,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                   ),
                 ),
                 SizedBox(
-                  width: 4.0,
+                  width: 8.0,
                 ),
                 if (widget.showPreview)
                   Expanded(
@@ -316,13 +324,15 @@ class _RichTextEditorState extends State<RichTextEditor> {
                           style: widget.textStyle,
                         ),
                         SizedBox(
-                          height: 4.0,
+                          height: 8.0,
                         ),
                         SingleChildScrollView(
                           controller: _previewScrollController,
                           child: Container(
                             constraints: BoxConstraints(
-                                maxHeight: 445, minHeight: 60, maxWidth: 659),
+                                maxHeight: widget.size.height + 50,
+                                minHeight: widget.size.height,
+                                maxWidth: 659),
                             padding: const EdgeInsets.symmetric(
                                 vertical: 8.0, horizontal: 8.0),
                             decoration: BoxDecoration(

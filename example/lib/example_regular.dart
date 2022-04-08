@@ -22,7 +22,6 @@ class RegularExample extends StatelessWidget {
               // do something with the richtext
             },
             alwaysShowButtons: true,
-            previewDecoration: RendererDecoration(overflowIndicator: "MORE"),
           ),
         ),
       ),

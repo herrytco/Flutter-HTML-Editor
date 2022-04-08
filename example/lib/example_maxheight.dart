@@ -25,8 +25,6 @@ class MaxHeightExample extends StatelessWidget {
               // do something with the richtext
             },
             alwaysShowButtons: true,
-            previewDecoration:
-                RendererDecoration(overflowIndicator: "MORE", label: "Preview"),
           ),
         ),
       ),
