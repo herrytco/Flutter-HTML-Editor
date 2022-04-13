@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 
 ///

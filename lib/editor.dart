@@ -138,14 +138,17 @@ class _RichTextEditorState extends State<RichTextEditor> {
             }
           }
 
-          if (lineIndex > 0) {
-            double scrollAmount = lineIndex / (lines.length - 1);
+          if (widget.showPreview) {
+            if (lineIndex > 0) {
+              double scrollAmount = lineIndex / (lines.length - 1);
 
-            _previewScrollController.animateTo(
-              _previewScrollController.position.maxScrollExtent * scrollAmount,
-              duration: Duration(milliseconds: 200),
-              curve: Curves.fastOutSlowIn,
-            );
+              _previewScrollController.animateTo(
+                _previewScrollController.position.maxScrollExtent *
+                    scrollAmount,
+                duration: Duration(milliseconds: 200),
+                curve: Curves.fastOutSlowIn,
+              );
+            }
           }
         }
       }
@@ -252,105 +255,88 @@ class _RichTextEditorState extends State<RichTextEditor> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        color: widget.editorDecoration.backgroundColor,
-        child: Column(
-          children: [
-            if (_areButtonsVisible) ...[
-              ButtonRow(
-                _wrapWithTag,
-                _wrapWithStartAndEnd,
-                widget.availableColors,
-              ),
-              SizedBox(
-                height: 8.0,
-              ),
-            ],
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+    return Container(
+      color: widget.editorDecoration.backgroundColor,
+      child: Column(
+        children: [
+          if (_areButtonsVisible) ...[
+            ButtonRow(
+              _wrapWithTag,
+              _wrapWithStartAndEnd,
+              widget.availableColors,
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+          ],
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => Container(
+                      height: constraints.maxHeight,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 8.0,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4.0),
+                        border: Border.all(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      child: SelectableTextfield(
+                        widget.editorDecoration,
+                        _textEditingController,
+                        (TextSelection selection) => _selection = selection,
+                        _focusNode,
+                        maxLength: widget.maxLength,
+                      ),
+                    ),
+                  ),
+                ),
+                if (widget.showPreview) ...[
+                  const SizedBox(width: 8.0),
                   Expanded(
                     child: Column(
-                      mainAxisSize: MainAxisSize.max,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          "Content",
+                          "Preview",
                           style: widget.textStyle,
                         ),
                         SizedBox(
                           height: 8.0,
                         ),
-                        Expanded(
-                          child: LayoutBuilder(
-                            builder: (context, constraints) => Container(
-                              height: constraints.maxHeight,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 8.0,
-                                horizontal: 8.0,
+                        SingleChildScrollView(
+                          controller: _previewScrollController,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 8.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4.0),
+                              border: Border.all(
+                                color: Theme.of(context).primaryColor,
                               ),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4.0),
-                                border: Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                              child: SelectableTextfield(
-                                widget.editorDecoration,
-                                _textEditingController,
-                                (TextSelection selection) =>
-                                    _selection = selection,
-                                _focusNode,
-                                maxLength: widget.maxLength,
-                              ),
+                            ),
+                            child: RichtextRenderer.fromRichtext(
+                              _textEditingController.text,
+                              placeholders: widget.placeholders,
+                              placeholderMarker: widget.placeholderMarker,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  if (widget.showPreview) ...[
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Preview",
-                            style: widget.textStyle,
-                          ),
-                          SizedBox(
-                            height: 8.0,
-                          ),
-                          SingleChildScrollView(
-                            controller: _previewScrollController,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0, horizontal: 8.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(4.0),
-                                border: Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                ),
-                              ),
-                              child: RichtextRenderer.fromRichtext(
-                                _textEditingController.text,
-                                placeholders: widget.placeholders,
-                                placeholderMarker: widget.placeholderMarker,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
