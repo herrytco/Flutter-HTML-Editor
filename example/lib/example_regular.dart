@@ -10,6 +10,8 @@ class RegularExample extends StatelessWidget {
       backgroundColor: Colors.grey,
       body: Center(
         child: SizedBox(
+          height: 800,
+          width: 500,
           child: RichTextEditor(
             placeholders: [
               RichTextPlaceholder(
@@ -21,6 +23,8 @@ class RegularExample extends StatelessWidget {
               // do something with the richtext
             },
             alwaysShowButtons: true,
+            showPreview: false,
+            showHeaderButton: true,
           ),
         ),
       ),
