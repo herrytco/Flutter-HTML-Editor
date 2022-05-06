@@ -5,13 +5,17 @@ import 'package:light_html_editor/ui/buttons/icon_button.dart';
 
 class ButtonRow extends StatelessWidget {
   const ButtonRow(
-      this.wrapWithTag, this.wrapWithStartAndEnd, this.availableColors,
-      {Key? key})
-      : super(key: key);
+    this.wrapWithTag,
+    this.wrapWithStartAndEnd,
+    this.availableColors,
+    this.additionalButtons, {
+    Key? key,
+  }) : super(key: key);
 
   final Function(String) wrapWithTag;
   final Function(String, String) wrapWithStartAndEnd;
   final List<String> availableColors;
+  final List<Widget> additionalButtons;
 
   /// wraps the current selection with <b></b>
   void _onBold() => wrapWithTag("b");
@@ -118,7 +122,11 @@ class ButtonRow extends StatelessWidget {
             onClick: _onLink,
           ),
           for (String color in availableColors)
-            FontColorButton.fromColor(color, () => _onColor(color)),
+            FontColorButton.fromColor(
+              color,
+              () => _onColor(color),
+            ),
+          ...additionalButtons,
         ],
       ),
     );

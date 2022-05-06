@@ -56,6 +56,7 @@ class RichTextEditor extends StatefulWidget {
     this.availableColors = TextConstants.defaultColors,
     this.alwaysShowButtons = false,
     this.controller,
+    this.additionalActionButtons,
   }) : super(key: key);
   final TextStyle? textStyle;
   final bool showPreview;
@@ -67,6 +68,7 @@ class RichTextEditor extends StatefulWidget {
   final List<String> availableColors;
   final TextEditingController? controller;
   final bool alwaysShowButtons;
+  final List<Widget>? additionalActionButtons;
 
   final EditorDecoration editorDecoration;
 
@@ -117,41 +119,41 @@ class _RichTextEditorState extends State<RichTextEditor> {
       widget.onChanged(_textEditingController.text);
 
       // get last character
-      int position = _textEditingController.selection.extentOffset;
+      // int position = _textEditingController.selection.extentOffset;
 
-      if (position > 0) {
-        String lastChar = _textEditingController
-            .text[_textEditingController.selection.extentOffset - 1];
+      // if (position > 0) {
+      //   String lastChar = _textEditingController
+      //       .text[_textEditingController.selection.extentOffset - 1];
 
-        if (lastChar == "\n" || true) {
-          List<String> lines = _textEditingController.text.split("\n");
-          int buffer = 0, lineIndex = -1;
+      //   if (lastChar == "\n" || true) {
+      //     List<String> lines = _textEditingController.text.split("\n");
+      //     int buffer = 0, lineIndex = -1;
 
-          for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
+      //     for (int i = 0; i < lines.length; i++) {
+      //       String line = lines[i];
 
-            buffer += line.length + 1;
+      //       buffer += line.length + 1;
 
-            if (buffer > position) {
-              lineIndex = i;
-              break;
-            }
-          }
+      //       if (buffer > position) {
+      //         lineIndex = i;
+      //         break;
+      //       }
+      //     }
 
-          if (widget.showPreview) {
-            if (lineIndex > 0) {
-              double scrollAmount = lineIndex / (lines.length - 1);
+      // if (widget.showPreview) {
+      //   if (lineIndex > 0) {
+      //     double scrollAmount = lineIndex / (lines.length - 1);
 
-              _previewScrollController.animateTo(
-                _previewScrollController.position.maxScrollExtent *
-                    scrollAmount,
-                duration: Duration(milliseconds: 200),
-                curve: Curves.fastOutSlowIn,
-              );
-            }
-          }
-        }
-      }
+      //     _previewScrollController.animateTo(
+      //       _previewScrollController.position.maxScrollExtent *
+      //           scrollAmount,
+      //       duration: Duration(milliseconds: 200),
+      //       curve: Curves.fastOutSlowIn,
+      //     );
+      //   }
+      // }
+      // }
+      // }
     });
     super.initState();
   }
@@ -264,6 +266,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
               _wrapWithTag,
               _wrapWithStartAndEnd,
               widget.availableColors,
+              widget.additionalActionButtons ?? [],
             ),
             SizedBox(
               height: 8.0,
