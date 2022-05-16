@@ -3,9 +3,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class HtmlEditorController extends TextEditingController {
+  HtmlEditorController({String? text}) : super(text: text);
+
   void insertAtCursor(String textToInsert) {
-    final textBefore = text.substring(0, selection.baseOffset);
-    final textAfter = text.substring(selection.extentOffset);
+    final textBefore =
+        selection.baseOffset < 1 ? "" : text.substring(0, selection.baseOffset);
+    final textAfter =
+        selection.baseOffset < 1 ? "" : text.substring(selection.extentOffset);
     final newText = textBefore + textToInsert + textAfter;
     final endPositionAfterInsert = textBefore.length + textToInsert.length;
     final newSelection = TextSelection(
