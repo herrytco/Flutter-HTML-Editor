@@ -22,7 +22,7 @@ class SelectableTextfield extends StatefulWidget {
   const SelectableTextfield(
     this.editorDecoration,
     this.controller,
-    this.onSelectionChange,
+    // this.onSelectionChange,
     this.focusNode, {
     Key? key,
     this.maxLength,
@@ -33,7 +33,7 @@ class SelectableTextfield extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
 
-  final Function(TextSelection) onSelectionChange;
+  // final Function(TextSelection) onSelectionChange;
 
   @override
   _SelectableTextfieldState createState() => _SelectableTextfieldState();
@@ -42,10 +42,10 @@ class SelectableTextfield extends StatefulWidget {
 class _SelectableTextfieldState extends State<SelectableTextfield> {
   @override
   void initState() {
-    widget.controller.addListener(() {
-      if (widget.focusNode.hasFocus)
-        widget.onSelectionChange(widget.controller.selection);
-    });
+    // widget.controller.addListener(() {
+    //   if (widget.focusNode.hasFocus)
+    //     widget.onSelectionChange(widget.controller.selection);
+    // });
     super.initState();
   }
 

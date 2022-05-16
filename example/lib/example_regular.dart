@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/html_editor_controller.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -10,6 +11,7 @@ class RegularExample extends StatefulWidget {
 }
 
 class _RegularExampleState extends State<RegularExample> {
+  final controller = HtmlEditorController();
   Html htmlBox = Html(data: "startwert");
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,7 @@ class _RegularExampleState extends State<RegularExample> {
                 children: [
                   Expanded(
                     child: RichTextEditor(
+                      controller: controller,
                       availableColors: [],
                       placeholders: [
                         RichTextPlaceholder(
@@ -53,6 +56,12 @@ class _RegularExampleState extends State<RegularExample> {
                   ),
                 ],
               ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                controller.insertAtCursor("Hello world!");
+              },
+              child: const Text("Insert hello world at cursor"),
             ),
             Text(htmlBox.data ?? ""),
           ],

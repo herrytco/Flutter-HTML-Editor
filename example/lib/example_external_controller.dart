@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/editor.dart';
+import 'package:light_html_editor/html_editor_controller.dart';
 
 class ExternalControllerDemo extends StatefulWidget {
   const ExternalControllerDemo({Key? key}) : super(key: key);
@@ -9,7 +10,7 @@ class ExternalControllerDemo extends StatefulWidget {
 }
 
 class _ExternalControllerDemoState extends State<ExternalControllerDemo> {
-  final TextEditingController _controller = TextEditingController();
+  final _controller = HtmlEditorController();
 
   @override
   void initState() {
