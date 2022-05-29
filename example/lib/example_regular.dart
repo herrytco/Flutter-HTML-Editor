@@ -29,9 +29,6 @@ class _RegularExampleState extends State<RegularExample> {
                 children: [
                   Expanded(
                     child: RichTextEditor(
-                      previewDecoration: RendererDecoration(
-                        defaultColor: Colors.red,
-                      ),
                       controller: controller,
                       availableColors: [],
                       placeholders: [

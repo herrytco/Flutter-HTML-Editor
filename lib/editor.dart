@@ -250,6 +250,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                                   _controller.text,
                                   placeholders: widget.placeholders,
                                   placeholderMarker: widget.placeholderMarker,
+                                  rendererDecoration: widget.previewDecoration,
                                 ),
                               ),
                             ),
