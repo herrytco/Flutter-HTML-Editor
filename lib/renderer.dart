@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/parser.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/api/text_renderer.dart';
-import 'package:light_html_editor/data/renderer_properties.dart';
+import 'package:light_html_editor/data/renderer_decoration.dart';
 import 'package:light_html_editor/editor.dart';
 import 'package:light_html_editor/placeholder.dart';
 

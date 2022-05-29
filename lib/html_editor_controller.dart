@@ -23,6 +23,12 @@ class HtmlEditorController extends TextEditingController {
   }
 
   ///
+  /// node of the TextField used in the editor. Used to ensure the editor input
+  /// is selected after the ButtonRow was clicked
+  ///
+  FocusNode? editorFocusNode;
+
+  ///
   /// wraps the current text-selection with the provided tags. If no text is
   /// selected, an empty tag-pair is inserted at the current cursor position.
   /// If the field is not focused, the empty tag-pair is appended to the current
@@ -61,8 +67,9 @@ class HtmlEditorController extends TextEditingController {
 
     text = after;
 
-    // Disabled this, not sure what its for
-    // if (!_focusNode.hasFocus) FocusScope.of(context).requestFocus(_focusNode);
+    if (editorFocusNode != null) {
+      editorFocusNode!.requestFocus();
+    }
 
     if (before.length == 0) {
       selection = TextSelection(

@@ -13,6 +13,7 @@ class RegularExample extends StatefulWidget {
 class _RegularExampleState extends State<RegularExample> {
   final controller = HtmlEditorController();
   Html htmlBox = Html(data: "startwert");
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,6 +29,9 @@ class _RegularExampleState extends State<RegularExample> {
                 children: [
                   Expanded(
                     child: RichTextEditor(
+                      previewDecoration: RendererDecoration(
+                        defaultColor: Colors.red,
+                      ),
                       controller: controller,
                       availableColors: [],
                       placeholders: [
@@ -45,11 +49,12 @@ class _RegularExampleState extends State<RegularExample> {
                         });
                       },
                       alwaysShowButtons: true,
-                      showPreview: false,
+                      showPreview: true,
                       showHeaderButton: true,
                     ),
                   ),
-                  SizedBox(
+                  Container(
+                    color: Colors.blue,
                     width: 400,
                     height: 500,
                     child: htmlBox,
@@ -63,7 +68,6 @@ class _RegularExampleState extends State<RegularExample> {
               },
               child: const Text("Insert hello world at cursor"),
             ),
-            Text(htmlBox.data ?? ""),
           ],
         ),
       ),
