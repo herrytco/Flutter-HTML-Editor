@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 
 ///
@@ -23,7 +22,7 @@ class SelectableTextfield extends StatefulWidget {
   const SelectableTextfield(
     this.editorDecoration,
     this.controller,
-    this.onSelectionChange,
+    // this.onSelectionChange,
     this.focusNode, {
     Key? key,
     this.maxLength,
@@ -34,7 +33,7 @@ class SelectableTextfield extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
 
-  final Function(TextSelection) onSelectionChange;
+  // final Function(TextSelection) onSelectionChange;
 
   @override
   _SelectableTextfieldState createState() => _SelectableTextfieldState();
@@ -43,10 +42,10 @@ class SelectableTextfield extends StatefulWidget {
 class _SelectableTextfieldState extends State<SelectableTextfield> {
   @override
   void initState() {
-    widget.controller.addListener(() {
-      if (widget.focusNode.hasFocus)
-        widget.onSelectionChange(widget.controller.selection);
-    });
+    // widget.controller.addListener(() {
+    //   if (widget.focusNode.hasFocus)
+    //     widget.onSelectionChange(widget.controller.selection);
+    // });
     super.initState();
   }
 
@@ -75,25 +74,18 @@ class _SelectableTextfieldState extends State<SelectableTextfield> {
       },
       controller: widget.controller,
       focusNode: widget.focusNode,
-      minLines: 1,
-      maxLines: widget.editorDecoration.maxLines,
-      maxLength: widget.maxLength,
-      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+      maxLines: null,
+      keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
         labelText: widget.editorDecoration.editorLabel,
         labelStyle: widget.focusNode.hasFocus
             ? widget.editorDecoration.focusedLabelStyle
             : widget.editorDecoration.labelStyle,
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: Theme.of(context).primaryColor,
-          ),
-        ),
-        focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(
-            color: widget.editorDecoration.cursorColor,
-          ),
-        ),
+        enabledBorder: InputBorder.none,
+        isDense: true,
+        focusedBorder: InputBorder.none,
+        counterText: "",
+        contentPadding: EdgeInsets.symmetric(vertical: 14.0),
       ),
       cursorColor: widget.editorDecoration.cursorColor,
       style: widget.editorDecoration.inputStyle,

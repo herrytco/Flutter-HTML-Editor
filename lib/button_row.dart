@@ -1,44 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/html_editor_controller.dart';
 import 'package:light_html_editor/ui/buttons/color_button.dart';
 import 'package:light_html_editor/ui/buttons/custom_button.dart';
 import 'package:light_html_editor/ui/buttons/icon_button.dart';
 
 class ButtonRow extends StatelessWidget {
   const ButtonRow(
-      this.wrapWithTag, this.wrapWithStartAndEnd, this.availableColors,
-      {Key? key})
-      : super(key: key);
+    this.controller,
+    this.availableColors,
+    this.additionalButtons, {
+    Key? key,
+  }) : super(key: key);
 
-  final Function(String) wrapWithTag;
-  final Function(String, String) wrapWithStartAndEnd;
   final List<String> availableColors;
+  final List<Widget> additionalButtons;
+  final HtmlEditorController controller;
 
   /// wraps the current selection with <b></b>
-  void _onBold() => wrapWithTag("b");
+  void _onBold() => controller.wrapWithTag("b");
 
   /// wraps the current selection with <i></i>
-  void _onItalics() => wrapWithTag("i");
+  void _onItalics() => controller.wrapWithTag("i");
 
   /// wraps the current selection with <u></u>
-  void _onUnderline() => wrapWithTag("u");
+  void _onUnderline() => controller.wrapWithTag("u");
 
   /// wraps the current selection with <p></p>
-  void _onParagraph() => wrapWithTag("p");
+  void _onParagraph() => controller.wrapWithTag("p");
 
   /// wraps the current selection with <h1></h1>
-  void _onH1() => wrapWithTag("h1");
+  void _onH1() => controller.wrapWithTag("h1");
 
   /// wraps the current selection with <h2></h2>
-  void _onH2() => wrapWithTag("h2");
+  void _onH2() => controller.wrapWithTag("h2");
 
   /// wraps the current selection with <h3></h3>
-  void _onH3() => wrapWithTag("h3");
+  void _onH3() => controller.wrapWithTag("h3");
 
   /// wraps the current selection with <span style="color:[hex]"></span>
   void _onColor(String hex) =>
-      wrapWithStartAndEnd('<span style="color:$hex;">', '</span>');
+      controller.wrapWithStartAndEnd('<span style="color:$hex;">', '</span>');
 
-  void _onLink() => wrapWithStartAndEnd('<a href="">', '</a>');
+  void _onLink() => controller.wrapWithStartAndEnd('<a href="">', '</a>');
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +121,11 @@ class ButtonRow extends StatelessWidget {
             onClick: _onLink,
           ),
           for (String color in availableColors)
-            FontColorButton.fromColor(color, () => _onColor(color)),
+            FontColorButton.fromColor(
+              color,
+              () => _onColor(color),
+            ),
+          ...additionalButtons,
         ],
       ),
     );

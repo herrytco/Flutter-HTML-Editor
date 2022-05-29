@@ -1,13 +1,12 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/button_row.dart';
+import 'package:light_html_editor/data/editor_properties.dart';
+import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/placeholder.dart';
 import 'package:light_html_editor/renderer.dart';
-import 'package:light_html_editor/data/editor_properties.dart';
-import 'package:light_html_editor/data/renderer_properties.dart';
-import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/ui/selectable_textfield.dart';
+
+import 'html_editor_controller.dart';
 
 ///
 /// Lightweight HTML editor with optional preview function. Uses all width
@@ -45,6 +44,7 @@ class RichTextEditor extends StatefulWidget {
   ///
   const RichTextEditor({
     Key? key,
+    this.textStyle,
     this.showPreview = true,
     this.showHeaderButton = true,
     this.initialValue,
@@ -52,16 +52,13 @@ class RichTextEditor extends StatefulWidget {
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
     this.onChanged = RichTextEditor._doNothingWithResult,
-    this.previewDecoration = const RendererDecoration(
-      label: "Preview",
-      labelStyle: TextConstants.labelStyle,
-    ),
     this.editorDecoration = const EditorDecoration(),
     this.availableColors = TextConstants.defaultColors,
     this.alwaysShowButtons = false,
     this.controller,
+    this.additionalActionButtons,
   }) : super(key: key);
-
+  final TextStyle? textStyle;
   final bool showPreview;
   final bool showHeaderButton;
   final String? initialValue;
@@ -69,11 +66,11 @@ class RichTextEditor extends StatefulWidget {
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
   final List<String> availableColors;
-  final TextEditingController? controller;
   final bool alwaysShowButtons;
+  final List<Widget>? additionalActionButtons;
 
-  final RendererDecoration previewDecoration;
   final EditorDecoration editorDecoration;
+  final HtmlEditorController? controller;
 
   final Function(String) onChanged;
 
@@ -83,7 +80,7 @@ class RichTextEditor extends StatefulWidget {
 
 class _RichTextEditorState extends State<RichTextEditor> {
   /// used to control the HTML text and cursor position/selection
-  TextEditingController _textEditingController = TextEditingController();
+  late HtmlEditorController _controller;
 
   /// focusNode of the editor input field
   FocusNode _focusNode = FocusNode();
@@ -91,21 +88,15 @@ class _RichTextEditorState extends State<RichTextEditor> {
   /// handles visibility of editor-controls
   bool _areButtonsVisible = false;
 
-  // currently selected text
-  TextSelection? _selection;
-
   ScrollController _previewScrollController = ScrollController();
 
   @override
   void initState() {
+    _controller = widget.controller ?? new HtmlEditorController();
     _areButtonsVisible = widget.alwaysShowButtons;
 
-    // use external controller, if provided
-    if (widget.controller != null) _textEditingController = widget.controller!;
-
     // copy in initial value if provided
-    if (_textEditingController.text.isEmpty)
-      _textEditingController.text = widget.initialValue ?? "";
+    if (_controller.text.isEmpty) _controller.text = widget.initialValue ?? "";
 
     // initialize event handler for hiding buttons
     if (!widget.alwaysShowButtons)
@@ -116,187 +107,130 @@ class _RichTextEditorState extends State<RichTextEditor> {
       });
 
     // initialize event handler for new input
-    _textEditingController.addListener(() {
+    _controller.addListener(() {
       setState(() {});
 
-      widget.onChanged(_textEditingController.text);
+      widget.onChanged(_controller.text);
 
       // get last character
-      int position = _textEditingController.selection.extentOffset;
+      // int position = _textEditingController.selection.extentOffset;
 
-      if (position > 0) {
-        String lastChar = _textEditingController
-            .text[_textEditingController.selection.extentOffset - 1];
+      // if (position > 0) {
+      //   String lastChar = _textEditingController
+      //       .text[_textEditingController.selection.extentOffset - 1];
 
-        if (lastChar == "\n" || true) {
-          List<String> lines = _textEditingController.text.split("\n");
-          int buffer = 0, lineIndex = -1;
+      //   if (lastChar == "\n" || true) {
+      //     List<String> lines = _textEditingController.text.split("\n");
+      //     int buffer = 0, lineIndex = -1;
 
-          for (int i = 0; i < lines.length; i++) {
-            String line = lines[i];
+      //     for (int i = 0; i < lines.length; i++) {
+      //       String line = lines[i];
 
-            buffer += line.length + 1;
+      //       buffer += line.length + 1;
 
-            if (buffer > position) {
-              lineIndex = i;
-              break;
-            }
-          }
+      //       if (buffer > position) {
+      //         lineIndex = i;
+      //         break;
+      //       }
+      //     }
 
-          if (lineIndex > 0) {
-            double scrollAmount = lineIndex / (lines.length - 1);
+      // if (widget.showPreview) {
+      //   if (lineIndex > 0) {
+      //     double scrollAmount = lineIndex / (lines.length - 1);
 
-            _previewScrollController.animateTo(
-              _previewScrollController.position.maxScrollExtent * scrollAmount,
-              duration: Duration(milliseconds: 200),
-              curve: Curves.fastOutSlowIn,
-            );
-          }
-        }
-      }
+      //     _previewScrollController.animateTo(
+      //       _previewScrollController.position.maxScrollExtent *
+      //           scrollAmount,
+      //       duration: Duration(milliseconds: 200),
+      //       curve: Curves.fastOutSlowIn,
+      //     );
+      //   }
+      // }
+      // }
+      // }
     });
     super.initState();
-  }
-
-  ///
-  /// wraps the current text-selection with the provided tags. If no text is
-  /// selected, an empty tag-pair is inserted at the current cursor position.
-  /// If the field is not focused, the empty tag-pair is appended to the current
-  /// text.
-  ///
-  /// Start- and End-Tag do not have to be the same, allowing properties in the
-  /// tag.
-  ///
-  void _wrapWithStartAndEnd(String startTag, String endTag) {
-    TextSelection? selection = _selection;
-
-    int start = selection == null
-        ? -1
-        : min(selection.baseOffset, selection.extentOffset);
-    int end = selection == null
-        ? -1
-        : max(selection.baseOffset, selection.extentOffset);
-
-    String before = _textEditingController.text;
-    String after;
-
-    if (before.length == 0) {
-      after = "$startTag$endTag";
-    } else if (start == -1 && end == -1) {
-      after = "$before$startTag$endTag";
-    } else if (start == end) {
-      if (start == 0)
-        after = "$startTag$endTag$before";
-      else {
-        String a = before.substring(0, start);
-        String b = before.substring(start);
-
-        after = "$a$startTag$endTag$b";
-      }
-    } else {
-      String a = before.substring(0, start);
-      String b = before.substring(start, end);
-      String c = before.substring(end);
-
-      after = "$a$startTag$b$endTag$c";
-    }
-
-    _textEditingController.text = after;
-
-    if (!_focusNode.hasFocus) FocusScope.of(context).requestFocus(_focusNode);
-
-    if (before.length == 0) {
-      _textEditingController.selection = TextSelection(
-        baseOffset: startTag.length,
-        extentOffset: startTag.length,
-      );
-    } else if (start == -1 && end == -1) {
-      _textEditingController.selection = TextSelection(
-        baseOffset: "$before$startTag".length,
-        extentOffset: "$before$startTag".length,
-      );
-    } else if (start == end) {
-      if (start == 0)
-        _textEditingController.selection = TextSelection(
-          baseOffset: startTag.length,
-          extentOffset: startTag.length,
-        );
-      else {
-        String a = before.substring(0, start);
-
-        _textEditingController.selection = TextSelection(
-          baseOffset: "$a$startTag".length,
-          extentOffset: "$a$startTag".length,
-        );
-      }
-    } else {
-      String a = before.substring(0, start);
-      String b = before.substring(start, end);
-
-      _textEditingController.selection = TextSelection(
-        baseOffset: "$a$startTag".length,
-        extentOffset: "$a$startTag$b".length,
-      );
-    }
-
-    _selection = _textEditingController.selection;
-  }
-
-  ///
-  /// wraps the current text-selection a symmetric pair of tags. If no text is
-  /// selected, an empty tag-pair is inserted at the current cursor position.
-  /// If the field is not focused, the empty tag-pair is appended to the current
-  /// text.
-  ///
-  void _wrapWithTag(String tagname) {
-    String startTag = "<$tagname>";
-    String endTag = "</$tagname>";
-
-    _wrapWithStartAndEnd(startTag, endTag);
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       color: widget.editorDecoration.backgroundColor,
-      width: double.infinity,
       child: Column(
         children: [
-          if (_areButtonsVisible)
+          if (_areButtonsVisible) ...[
             ButtonRow(
-              _wrapWithTag,
-              _wrapWithStartAndEnd,
+              _controller,
               widget.availableColors,
+              widget.additionalActionButtons ?? [],
             ),
+            SizedBox(
+              height: 8.0,
+            ),
+          ],
           Expanded(
-            child: Column(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SelectableTextfield(
-                      widget.editorDecoration,
-                      _textEditingController,
-                      (TextSelection selection) => _selection = selection,
-                      _focusNode,
-                      maxLength: widget.maxLength,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: _previewScrollController,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: RichtextRenderer.fromRichtext(
-                        _textEditingController.text,
-                        rendererDecoration: widget.previewDecoration,
-                        placeholders: widget.placeholders,
-                        placeholderMarker: widget.placeholderMarker,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) => Container(
+                      height: constraints.maxHeight,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 8.0,
+                        horizontal: 8.0,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4.0),
+                        border: Border.all(
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      child: SelectableTextfield(
+                        widget.editorDecoration,
+                        _controller,
+                        _focusNode,
+                        maxLength: widget.maxLength,
                       ),
                     ),
                   ),
                 ),
+                if (widget.showPreview) ...[
+                  const SizedBox(width: 8.0),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Preview",
+                          style: widget.textStyle,
+                        ),
+                        SizedBox(
+                          height: 8.0,
+                        ),
+                        SingleChildScrollView(
+                          controller: _previewScrollController,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 8.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4.0),
+                              border: Border.all(
+                                color: Theme.of(context).primaryColor,
+                              ),
+                            ),
+                            child: RichtextRenderer.fromRichtext(
+                              _controller.text,
+                              placeholders: widget.placeholders,
+                              placeholderMarker: widget.placeholderMarker,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
