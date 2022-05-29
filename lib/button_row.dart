@@ -57,6 +57,7 @@ class ButtonRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
           ),
@@ -67,6 +68,7 @@ class ButtonRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontStyle: FontStyle.italic,
+                color: Colors.black,
               ),
             ),
           ),
@@ -77,6 +79,7 @@ class ButtonRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 decoration: TextDecoration.underline,
+                color: Colors.black,
               ),
             ),
           ),
@@ -86,6 +89,7 @@ class ButtonRow extends StatelessWidget {
               "P",
               style: TextStyle(
                 fontSize: 20,
+                color: Colors.black,
               ),
             ),
           ),
@@ -95,6 +99,7 @@ class ButtonRow extends StatelessWidget {
               "H1",
               style: TextStyle(
                 fontSize: 20,
+                color: Colors.black,
               ),
             ),
           ),
@@ -104,6 +109,7 @@ class ButtonRow extends StatelessWidget {
               "H2",
               style: TextStyle(
                 fontSize: 20,
+                color: Colors.black,
               ),
             ),
           ),
@@ -113,6 +119,7 @@ class ButtonRow extends StatelessWidget {
               "H3",
               style: TextStyle(
                 fontSize: 20,
+                color: Colors.black,
               ),
             ),
           ),

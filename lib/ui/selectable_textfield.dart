@@ -26,8 +26,10 @@ class SelectableTextfield extends StatefulWidget {
     this.focusNode, {
     Key? key,
     this.maxLength,
+    required this.autofocus,
   }) : super(key: key);
 
+  final bool autofocus;
   final int? maxLength;
   final EditorDecoration editorDecoration;
   final TextEditingController controller;
@@ -52,6 +54,7 @@ class _SelectableTextfieldState extends State<SelectableTextfield> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      autofocus: widget.autofocus,
       buildCounter: (
         context, {
         int? currentLength,
@@ -74,15 +77,11 @@ class _SelectableTextfieldState extends State<SelectableTextfield> {
       },
       controller: widget.controller,
       focusNode: widget.focusNode,
-      maxLines: null,
+      maxLines: widget.editorDecoration.maxLines,
       keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
-        labelText: widget.editorDecoration.editorLabel,
-        labelStyle: widget.focusNode.hasFocus
-            ? widget.editorDecoration.focusedLabelStyle
-            : widget.editorDecoration.labelStyle,
-        enabledBorder: InputBorder.none,
         isDense: true,
+        enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
         counterText: "",
         contentPadding: EdgeInsets.symmetric(vertical: 14.0),

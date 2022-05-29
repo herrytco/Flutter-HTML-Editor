@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 
 class EditorDecoration {
+  final BoxBorder? border;
+  final BorderRadiusGeometry? borderRadius;
   final Color backgroundColor;
   final Color cursorColor;
   final String? editorLabel;
@@ -11,6 +13,8 @@ class EditorDecoration {
   final int? maxLines;
 
   const EditorDecoration({
+    this.border,
+    this.borderRadius,
     this.editorLabel,
     this.backgroundColor = Colors.white,
     this.cursorColor = Colors.black,

@@ -1,3 +1,8 @@
+## 0.0.16
+
+* Added ```autofocus``` property to the Editor
+* Various changes in styling
+
 ## 0.0.13
 
 * Added ```maxLines``` property (to the Editor) to control how large the textfield can grow (null as default for infinite lines)
