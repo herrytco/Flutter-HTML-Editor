@@ -31,6 +31,12 @@ class _RegularExampleState extends State<RegularExample> {
                     child: RichTextEditor(
                       controller: controller,
                       availableColors: [],
+                      previewDecoration: RendererDecoration(textProperties: [
+                        RendererTextProperties(
+                          "h1",
+                          1.0,
+                        ),
+                      ]),
                       placeholders: [
                         RichTextPlaceholder(
                           "VAR",

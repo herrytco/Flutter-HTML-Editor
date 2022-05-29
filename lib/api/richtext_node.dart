@@ -153,12 +153,16 @@ class DocumentNode {
   /// If no suitable candidate is found, [TextConstants.defaultFontSize] will be
   /// returned.
   ///
-  double? get fontSize {
+  double? fontSize(Map<String, double> sizes) {
     DocumentNode? workingNode = this;
     String key = "font-size";
 
     while (workingNode != null) {
       if (TextConstants.headers.contains(workingNode.scope.name)) {
+        if (sizes[workingNode.scope.name] != null) {
+          return sizes[workingNode.scope.name];
+        }
+
         double? headerFontSize =
             TextConstants.headerSizes[workingNode.scope.name];
 

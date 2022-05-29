@@ -1,3 +1,8 @@
+## 0.0.17
+
+* Added options to provide font-sizes for header tags
+* Bumped version of ```url_launcher``` to version ```6.1.2```
+
 ## 0.0.16
 
 * Added ```autofocus``` property to the Editor
