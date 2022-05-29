@@ -52,6 +52,7 @@ class FontColorButton extends StatelessWidget {
             "A",
             style: TextStyle(
               fontSize: 18,
+              color: Colors.black,
             ),
           ),
           FractionallySizedBox(
