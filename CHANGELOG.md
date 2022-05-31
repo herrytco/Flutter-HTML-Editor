@@ -1,3 +1,7 @@
+## 0.0.18
+
+* Fixed ```showHeaderButton``` setting
+
 ## 0.0.17
 
 * Added options to provide font-sizes for header tags

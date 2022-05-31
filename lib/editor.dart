@@ -179,6 +179,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
               _controller,
               widget.availableColors,
               widget.additionalActionButtons ?? [],
+              showHeaderButtons: widget.showHeaderButton,
             ),
             SizedBox(
               height: 8.0,

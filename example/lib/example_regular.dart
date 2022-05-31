@@ -53,7 +53,7 @@ class _RegularExampleState extends State<RegularExample> {
                       },
                       alwaysShowButtons: true,
                       showPreview: true,
-                      showHeaderButton: true,
+                      showHeaderButton: false,
                     ),
                   ),
                   Container(

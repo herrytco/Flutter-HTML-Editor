@@ -10,11 +10,13 @@ class ButtonRow extends StatelessWidget {
     this.availableColors,
     this.additionalButtons, {
     Key? key,
+    required this.showHeaderButtons,
   }) : super(key: key);
 
   final List<String> availableColors;
   final List<Widget> additionalButtons;
   final HtmlEditorController controller;
+  final bool showHeaderButtons;
 
   /// wraps the current selection with <b></b>
   void _onBold() => controller.wrapWithTag("b");
@@ -93,36 +95,39 @@ class ButtonRow extends StatelessWidget {
               ),
             ),
           ),
-          FontCustomButton(
-            onClick: _onH1,
-            icon: Text(
-              "H1",
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black,
+          if (showHeaderButtons)
+            FontCustomButton(
+              onClick: _onH1,
+              icon: Text(
+                "H1",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black,
+                ),
               ),
             ),
-          ),
-          FontCustomButton(
-            onClick: _onH2,
-            icon: Text(
-              "H2",
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black,
+          if (showHeaderButtons)
+            FontCustomButton(
+              onClick: _onH2,
+              icon: Text(
+                "H2",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black,
+                ),
               ),
             ),
-          ),
-          FontCustomButton(
-            onClick: _onH3,
-            icon: Text(
-              "H3",
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black,
+          if (showHeaderButtons)
+            FontCustomButton(
+              onClick: _onH3,
+              icon: Text(
+                "H3",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.black,
+                ),
               ),
             ),
-          ),
           FontIconButton(
             Icons.link,
             onClick: _onLink,
