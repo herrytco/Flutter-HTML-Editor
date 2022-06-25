@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
-import 'package:light_html_editor/data/renderer_text_properties.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -64,6 +63,7 @@ class TextRenderer {
   }
 
   Map<String, double> _fontSizes = {};
+  Map<String, String> _fontFamilies = {};
 
   /// recursively parses the richtext-tree
   TextRenderer(
@@ -78,14 +78,25 @@ class TextRenderer {
     for (RendererTextProperties textProperties
         in rendererDecoration.textProperties) {
       _fontSizes[textProperties.tagName] = textProperties.fontSize;
+      if (textProperties.fontFamily != null)
+        _fontFamilies[textProperties.tagName] = textProperties.fontFamily!;
     }
 
-    if (!_fontSizes.containsKey(""))
+    if (!_fontSizes.containsKey("")) {
       _fontSizes[""] = TextConstants.defaultFontSize;
+    }
+
+    if (!_fontFamilies.containsKey("")) {
+      _fontFamilies[""] = TextConstants.defaultFontFamily;
+    }
 
     for (String tag in TextConstants.headerSizes.keys) {
       if (!_fontSizes.containsKey(tag))
         _fontSizes[tag] = TextConstants.headerSizes[tag]!;
+
+      if (!_fontFamilies.containsKey(tag)) {
+        _fontFamilies[tag] = TextConstants.defaultFontFamily;
+      }
     }
 
     _proccessNode(root);
@@ -199,6 +210,7 @@ class TextRenderer {
               fontSize: node.fontSize(_fontSizes) != null
                   ? node.fontSize(_fontSizes)
                   : _fontSizes[""],
+              fontFamily: _fontFamilies[""],
               fontWeight: node.isBold ? FontWeight.bold : FontWeight.normal,
               fontStyle: node.isItalics ? FontStyle.italic : FontStyle.normal,
               color: _color(node),

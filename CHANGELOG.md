@@ -1,3 +1,7 @@
+## 0.0.19
+
+* Added possibility to define font-family.
+
 ## 0.0.18
 
 * Fixed ```showHeaderButton``` setting

@@ -4,6 +4,9 @@ class TextConstants {
   /// font-size used when no size is specified
   static const double defaultFontSize = 16;
 
+  /// font-family used when no family is specified
+  static const String defaultFontFamily = "Roboto";
+
   /// color used if no color is specified
   static const Color defaultColor = Colors.black;
 
