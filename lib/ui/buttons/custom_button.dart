@@ -25,12 +25,6 @@ class FontCustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-          // color: Colors.grey[50],
-          // border: Border.all(
-          //   color: Colors.black,
-          // ),
-          ),
       width: 30,
       height: 30,
       child: Material(

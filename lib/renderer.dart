@@ -27,8 +27,7 @@ class RichtextRenderer extends StatelessWidget {
     this.ignoreLinebreaks = false,
   }) : super(key: key) {
     if (maxLines != null && maxLength != null)
-      throw Exception(
-          "maxLines and maxLength must not be != null at the sime time!");
+      throw Exception("maxLines == null || maxLength == null must be true");
   }
 
   final DocumentNode? root;

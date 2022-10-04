@@ -116,16 +116,26 @@ class _RichTextEditorState extends State<RichTextEditor> {
         });
       });
 
-    ///
-    /// initialize event handler for new input
-    ///
-    /// animate to the currently edited line in the preview
-    ///
+    _setupAutoScroll();
+
+    super.initState();
+  }
+
+  void _onChanged() {
+    widget.onChanged(_controller.text);
+  }
+
+  ///
+  /// initialize event handler for new input
+  ///
+  /// animate to the currently edited line in the preview
+  ///
+  void _setupAutoScroll() {
     if (widget.previewDecoration.autoScroll) {
       _controller.addListener(() {
         setState(() {});
 
-        widget.onChanged(_controller.text);
+        _onChanged();
 
         // get last character
         int position = _controller.selection.extentOffset;
@@ -165,7 +175,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
         }
       });
     }
-    super.initState();
   }
 
   @override
@@ -180,6 +189,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
               widget.availableColors,
               widget.additionalActionButtons ?? [],
               showHeaderButtons: widget.showHeaderButton,
+              decoration: widget.editorDecoration,
             ),
             SizedBox(
               height: 8.0,
@@ -225,6 +235,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
                   const SizedBox(width: 8.0),
                   Expanded(
                     child: Container(
+                      padding: widget.previewDecoration.padding,
                       height: double.infinity,
                       child: Column(
                         children: [

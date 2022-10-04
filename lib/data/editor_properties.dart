@@ -12,6 +12,8 @@ class EditorDecoration {
   final TextStyle focusedLabelStyle;
   final int? maxLines;
 
+  final Color buttonColor;
+
   const EditorDecoration({
     this.border,
     this.borderRadius,
@@ -21,6 +23,7 @@ class EditorDecoration {
     this.inputStyle = TextConstants.labelStyle,
     this.labelStyle = TextConstants.labelStyle,
     this.focusedLabelStyle = TextConstants.labelStyle,
+    this.buttonColor = TextConstants.defaultColor,
     this.maxLines,
   });
 }

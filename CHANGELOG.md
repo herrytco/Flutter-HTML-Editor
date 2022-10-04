@@ -1,6 +1,11 @@
+## 0.0.20
+
+* Applied padding of `EditorDecoration` to renderer preview
+* Added undo-button that gets activated once a Tag has been inserted and undoes the insertion 
+
 ## 0.0.19
 
-* Added possibility to define font-family.
+* Added possibility to define font-family
 
 ## 0.0.18
 

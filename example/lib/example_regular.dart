@@ -12,66 +12,31 @@ class RegularExample extends StatefulWidget {
 
 class _RegularExampleState extends State<RegularExample> {
   final controller = HtmlEditorController();
-  Html htmlBox = Html(data: "startwert");
+  Html htmlBox = Html(
+    data: "",
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey,
       body: Center(
-        child: Column(
-          children: [
-            SizedBox(
-              height: 800,
-              width: 1000,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: RichTextEditor(
-                      controller: controller,
-                      availableColors: [],
-                      previewDecoration: RendererDecoration(textProperties: [
-                        RendererTextProperties(
-                          "h1",
-                          1.0,
-                        ),
-                      ]),
-                      placeholders: [
-                        RichTextPlaceholder(
-                          "VAR",
-                          "Some longer text that got shortened!",
-                        ),
-                      ],
-                      onChanged: (String html) {
-                        setState(() {
-                          this.htmlBox = Html(
-                            data: html,
-                            key: UniqueKey(),
-                          );
-                        });
-                      },
-                      alwaysShowButtons: true,
-                      showPreview: true,
-                      showHeaderButton: false,
-                    ),
-                  ),
-                  Container(
-                    color: Colors.blue,
-                    width: 400,
-                    height: 500,
-                    child: htmlBox,
-                  ),
-                ],
+        child: SizedBox(
+          width: 400,
+          child: RichTextEditor(
+            placeholders: [
+              RichTextPlaceholder(
+                "VAR",
+                "Some longer text that got shortened!",
               ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                controller.insertAtCursor("Hello world!");
-              },
-              child: const Text("Insert hello world at cursor"),
-            ),
-          ],
+            ],
+            onChanged: (String html) {
+              // do something with the richtext
+            },
+            alwaysShowButtons: true,
+            initialValue:
+                'Read more at <a href="https://www.google.at">Google</a>',
+          ),
         ),
       ),
     );

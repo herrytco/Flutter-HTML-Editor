@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/html_editor_controller.dart';
 import 'package:light_html_editor/ui/buttons/color_button.dart';
 import 'package:light_html_editor/ui/buttons/custom_button.dart';
@@ -11,12 +12,14 @@ class ButtonRow extends StatelessWidget {
     this.additionalButtons, {
     Key? key,
     required this.showHeaderButtons,
+    required this.decoration,
   }) : super(key: key);
 
   final List<String> availableColors;
   final List<Widget> additionalButtons;
   final HtmlEditorController controller;
   final bool showHeaderButtons;
+  final EditorDecoration decoration;
 
   /// wraps the current selection with <b></b>
   void _onBold() => controller.wrapWithTag("b");
@@ -45,6 +48,8 @@ class ButtonRow extends StatelessWidget {
 
   void _onLink() => controller.wrapWithStartAndEnd('<a href="">', '</a>');
 
+  void _onUndo() => controller.undo();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -59,7 +64,7 @@ class ButtonRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: decoration.buttonColor,
               ),
             ),
           ),
@@ -70,7 +75,7 @@ class ButtonRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontStyle: FontStyle.italic,
-                color: Colors.black,
+                color: decoration.buttonColor,
               ),
             ),
           ),
@@ -81,7 +86,7 @@ class ButtonRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 decoration: TextDecoration.underline,
-                color: Colors.black,
+                color: decoration.buttonColor,
               ),
             ),
           ),
@@ -91,51 +96,57 @@ class ButtonRow extends StatelessWidget {
               "P",
               style: TextStyle(
                 fontSize: 20,
-                color: Colors.black,
+                color: decoration.buttonColor,
               ),
             ),
           ),
-          if (showHeaderButtons)
+          if (showHeaderButtons) ...[
             FontCustomButton(
               onClick: _onH1,
               icon: Text(
                 "H1",
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.black,
+                  color: decoration.buttonColor,
                 ),
               ),
             ),
-          if (showHeaderButtons)
             FontCustomButton(
               onClick: _onH2,
               icon: Text(
                 "H2",
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.black,
+                  color: decoration.buttonColor,
                 ),
               ),
             ),
-          if (showHeaderButtons)
             FontCustomButton(
               onClick: _onH3,
               icon: Text(
                 "H3",
                 style: TextStyle(
                   fontSize: 20,
-                  color: Colors.black,
+                  color: decoration.buttonColor,
                 ),
               ),
             ),
+          ],
           FontIconButton(
             Icons.link,
             onClick: _onLink,
+            color: decoration.buttonColor,
           ),
           for (String color in availableColors)
             FontColorButton.fromColor(
               color,
               () => _onColor(color),
+            ),
+          if (controller.canUndo)
+            FontIconButton(
+              Icons.undo,
+              onClick: _onUndo,
+              color: decoration.buttonColor,
             ),
           ...additionalButtons,
         ],

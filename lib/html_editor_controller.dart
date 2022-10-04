@@ -3,8 +3,26 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class HtmlEditorController extends TextEditingController {
-  HtmlEditorController({String? text}) : super(text: text);
+  HtmlEditorController({String? text}) : super(text: text) {
+    addListener(() {
+      if (!canUndo || _oldText == null) {
+        _oldText = this.text;
+        return;
+      }
 
+      if (this.text.length == _oldText!.length + 1) _clearCache();
+
+      _oldText = this.text;
+    });
+  }
+
+  /// Cache for the text-value before the last change to detect single-stroke entries
+  String? _oldText;
+
+  ///
+  /// Adds [textToInsert] to the text of the controller while also keeping the
+  /// selection intact
+  ///
   void insertAtCursor(String textToInsert) {
     final textBefore =
         selection.baseOffset < 1 ? "" : text.substring(0, selection.baseOffset);
@@ -29,7 +47,49 @@ class HtmlEditorController extends TextEditingController {
   FocusNode? editorFocusNode;
 
   ///
-  /// wraps the current text-selection with the provided tags. If no text is
+  /// Placeholder to hold text for the undo-operation
+  ///
+  String? _cachedText;
+
+  ///
+  /// Placeholder to hold the selection for the undo-operation
+  ///
+  TextSelection? _cachedSelection;
+
+  bool get canUndo => _cachedText != null;
+
+  void undo() {
+    if (_cachedText == null) {
+      throw Exception("Cannot call undo if _cachedText is null!");
+    }
+
+    editorFocusNode?.requestFocus();
+
+    value = value.copyWith(
+      text: _cachedText!,
+      selection: _cachedSelection,
+    );
+
+    _clearCache();
+  }
+
+  ///
+  /// Wraps the current text-selection a symmetric pair of tags. If no text is
+  /// selected, an empty tag-pair is inserted at the current cursor position.
+  /// If the field is not focused, the empty tag-pair is appended to the current
+  /// text.
+  ///
+  void wrapWithTag(String tagName) {
+    _cache();
+
+    String startTag = "<$tagName>";
+    String endTag = "</$tagName>";
+
+    wrapWithStartAndEnd(startTag, endTag);
+  }
+
+  ///
+  /// Wraps the current text-selection with the provided tags. If no text is
   /// selected, an empty tag-pair is inserted at the current cursor position.
   /// If the field is not focused, the empty tag-pair is appended to the current
   /// text.
@@ -38,6 +98,8 @@ class HtmlEditorController extends TextEditingController {
   /// tag.
   ///
   void wrapWithStartAndEnd(String startTag, String endTag) {
+    _cache();
+
     int start = min(selection.baseOffset, selection.extentOffset);
     int end = max(selection.baseOffset, selection.extentOffset);
 
@@ -106,16 +168,13 @@ class HtmlEditorController extends TextEditingController {
     }
   }
 
-  ///
-  /// wraps the current text-selection a symmetric pair of tags. If no text is
-  /// selected, an empty tag-pair is inserted at the current cursor position.
-  /// If the field is not focused, the empty tag-pair is appended to the current
-  /// text.
-  ///
-  void wrapWithTag(String tagname) {
-    String startTag = "<$tagname>";
-    String endTag = "</$tagname>";
+  void _cache() {
+    _cachedText = text;
+    _cachedSelection = selection;
+  }
 
-    wrapWithStartAndEnd(startTag, endTag);
+  void _clearCache() {
+    _cachedText = null;
+    _cachedSelection = null;
   }
 }

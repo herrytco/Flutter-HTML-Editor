@@ -15,6 +15,7 @@ class FontIconButton extends StatelessWidget {
     this.icon, {
     Key? key,
     this.onClick = _doNothing,
+    required this.color,
   }) : super(key: key);
 
   /// string displayed in the button
@@ -23,11 +24,17 @@ class FontIconButton extends StatelessWidget {
   /// What to do if the button is clicked
   final Function onClick;
 
+  /// Color of the displayed icon
+  final Color color;
+
   @override
   Widget build(BuildContext context) {
     return FontCustomButton(
       onClick: onClick,
-      icon: Icon(icon),
+      icon: Icon(
+        icon,
+        color: color,
+      ),
     );
   }
 }
