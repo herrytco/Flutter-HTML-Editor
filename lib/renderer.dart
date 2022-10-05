@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:light_html_editor/api/parser.dart';
-import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/api/text_renderer.dart';
 import 'package:light_html_editor/data/renderer_decoration.dart';
 import 'package:light_html_editor/editor.dart';
@@ -18,7 +16,7 @@ class RichtextRenderer extends StatelessWidget {
   ///
   RichtextRenderer({
     Key? key,
-    @required this.root,
+    @required this.rawHtml,
     this.maxLength,
     this.maxLines,
     this.placeholderMarker = "\\\$",
@@ -30,7 +28,7 @@ class RichtextRenderer extends StatelessWidget {
       throw Exception("maxLines == null || maxLength == null must be true");
   }
 
-  final DocumentNode? root;
+  final String? rawHtml;
   final int? maxLength;
 
   /// optional maximum number of lines to be displayed.
@@ -57,7 +55,7 @@ class RichtextRenderer extends StatelessWidget {
     List<RichTextPlaceholder> placeholders = const [],
   }) {
     return RichtextRenderer(
-      root: Parser().parse(richtext),
+      rawHtml: richtext,
       maxLength: maxLength,
       maxLines: maxLines,
       rendererDecoration: rendererDecoration,
@@ -88,12 +86,10 @@ class RichtextRenderer extends StatelessWidget {
                   ? rendererDecoration.maxHeight!
                   : double.infinity,
             ),
-            child: root != null &&
-                    root!.children.length == 0 &&
-                    root!.text.length == 0
+            child: rawHtml != null && rawHtml!.isEmpty
                 ? SizedBox()
                 : TextRenderer(
-                    root!,
+                    rawHtml!,
                     rendererDecoration,
                     maxLength,
                     maxLines,

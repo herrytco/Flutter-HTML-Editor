@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/api/parser.dart';
+import 'package:light_html_editor/api/v2/printer.dart';
 import 'package:light_html_editor/button_row.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/light_html_editor.dart';
@@ -116,13 +118,15 @@ class _RichTextEditorState extends State<RichTextEditor> {
         });
       });
 
+    _controller.addListener(() {
+      setState(() {
+        widget.onChanged(_controller.text);
+      });
+    });
+
     _setupAutoScroll();
 
     super.initState();
-  }
-
-  void _onChanged() {
-    widget.onChanged(_controller.text);
   }
 
   ///
@@ -131,12 +135,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
   /// animate to the currently edited line in the preview
   ///
   void _setupAutoScroll() {
-    if (widget.previewDecoration.autoScroll) {
+    if (widget.previewDecoration.autoScroll && widget.showPreview) {
       _controller.addListener(() {
-        setState(() {});
-
-        _onChanged();
-
         // get last character
         int position = _controller.selection.extentOffset;
 
@@ -159,17 +159,15 @@ class _RichTextEditorState extends State<RichTextEditor> {
               }
             }
 
-            if (widget.showPreview) {
-              if (lineIndex > 0) {
-                double scrollAmount = lineIndex / (lines.length - 1);
+            if (lineIndex > 0) {
+              double scrollAmount = lineIndex / (lines.length - 1);
 
-                _previewScrollController.animateTo(
-                  _previewScrollController.position.maxScrollExtent *
-                      scrollAmount,
-                  duration: Duration(milliseconds: 200),
-                  curve: Curves.fastOutSlowIn,
-                );
-              }
+              _previewScrollController.animateTo(
+                _previewScrollController.position.maxScrollExtent *
+                    scrollAmount,
+                duration: Duration(milliseconds: 200),
+                curve: Curves.fastOutSlowIn,
+              );
             }
           }
         }

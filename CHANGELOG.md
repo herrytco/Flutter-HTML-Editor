@@ -1,3 +1,8 @@
+## 0.0.30
+
+* Implemented a new parser to convert the raw HTML into a tree
+* `Parser.cleanTagsFromRichtext(String)` and `Parser.replaceVariables(String, List<RichTextPlaceholder>, String)` are now static methods
+
 ## 0.0.20
 
 * Applied padding of `EditorDecoration` to renderer preview

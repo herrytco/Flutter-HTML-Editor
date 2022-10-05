@@ -17,6 +17,7 @@ dependencies:
   flutter_html: ^3.0.0-alpha.6
 
 dev_dependencies:
+  dart_code_metrics: ^4.19.1
   flutter_test:
     sdk: flutter
 
