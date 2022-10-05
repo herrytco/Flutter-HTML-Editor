@@ -34,8 +34,7 @@ class _EmptyExampleState extends State<EmptyExample> {
               // do something with the richtext
             },
             alwaysShowButtons: true,
-            initialValue:
-                'regular text<h1>Header <p>asfdasdfasdfasdasdf</p> jköljlkjöljkölkjöj</h1>should have its own line',
+            initialValue: 'abcd<b>xyz</b>ooh!',
           ),
         ),
       ),

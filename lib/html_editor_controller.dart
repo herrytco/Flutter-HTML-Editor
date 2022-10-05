@@ -1,6 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/api/operations/tag_operation.dart';
+import 'package:light_html_editor/api/parser.dart';
+import 'package:light_html_editor/api/v2/node_v2.dart';
 
 class HtmlEditorController extends TextEditingController {
   HtmlEditorController({String? text}) : super(text: text) {
@@ -58,6 +59,10 @@ class HtmlEditorController extends TextEditingController {
 
   bool get canUndo => _cachedText != null;
 
+  ///
+  /// Replaces the text/selection with the cached version. This wipes the two
+  /// cached properties => this method is not idempotent
+  ///
   void undo() {
     if (_cachedText == null) {
       throw Exception("Cannot call undo if _cachedText is null!");
@@ -85,7 +90,7 @@ class HtmlEditorController extends TextEditingController {
     String startTag = "<$tagName>";
     String endTag = "</$tagName>";
 
-    wrapWithStartAndEnd(startTag, endTag);
+    wrapWithStartAndEnd(TagOperation(startTag, endTag));
   }
 
   ///
@@ -97,76 +102,57 @@ class HtmlEditorController extends TextEditingController {
   /// Start- and End-Tag do not have to be the same, allowing properties in the
   /// tag.
   ///
-  void wrapWithStartAndEnd(String startTag, String endTag) {
+  void wrapWithStartAndEnd(TagOperation op) {
     _cache();
 
-    int start = min(selection.baseOffset, selection.extentOffset);
-    int end = max(selection.baseOffset, selection.extentOffset);
+    op.setSelection(selection);
 
     String before = text;
-    String after;
+    String after = op.applyOperationTo(text);
 
-    if (before.length == 0) {
-      after = "$startTag$endTag";
-    } else if (start == -1 && end == -1) {
-      after = "$before$startTag$endTag";
-    } else if (start == end) {
-      if (start == 0)
-        after = "$startTag$endTag$before";
-      else {
-        String a = before.substring(0, start);
-        String b = before.substring(start);
-
-        after = "$a$startTag$endTag$b";
-      }
-    } else {
-      String a = before.substring(0, start);
-      String b = before.substring(start, end);
-      String c = before.substring(end);
-
-      after = "$a$startTag$b$endTag$c";
-    }
-
-    text = after;
+    text = Parser().parse(after).toHtml();
 
     if (editorFocusNode != null) {
       editorFocusNode!.requestFocus();
     }
 
+    // adjust selection
     if (before.length == 0) {
       selection = TextSelection(
-        baseOffset: startTag.length,
-        extentOffset: startTag.length,
+        baseOffset: op.startTag.length,
+        extentOffset: op.startTag.length,
       );
-    } else if (start == -1 && end == -1) {
+    } else if (op.start == -1 && op.end == -1) {
       selection = TextSelection(
-        baseOffset: "$before$startTag".length,
-        extentOffset: "$before$startTag".length,
+        baseOffset: "$before${op.startTag}".length,
+        extentOffset: "$before${op.startTag}".length,
       );
-    } else if (start == end) {
-      if (start == 0)
+    } else if (op.start == op.end) {
+      if (op.start == 0)
         selection = TextSelection(
-          baseOffset: startTag.length,
-          extentOffset: startTag.length,
+          baseOffset: op.startTag.length,
+          extentOffset: op.startTag.length,
         );
       else {
-        String a = before.substring(0, start);
+        String a = before.substring(0, op.start);
 
         selection = TextSelection(
-          baseOffset: "$a$startTag".length,
-          extentOffset: "$a$startTag".length,
+          baseOffset: "$a${op.startTag}".length,
+          extentOffset: "$a${op.startTag}".length,
         );
       }
     } else {
-      String a = before.substring(0, start);
-      String b = before.substring(start, end);
+      String a = before.substring(0, op.start);
+      String b = before.substring(op.start!, op.end);
 
       selection = TextSelection(
-        baseOffset: "$a$startTag".length,
-        extentOffset: "$a$startTag$b".length,
+        baseOffset: "$a${op.startTag}".length,
+        extentOffset: "$a${op.startTag}$b".length,
       );
     }
   }
+
+  void insertStyleProperty(StyleProperty prop) {}
 
   void _cache() {
     _cachedText = text;

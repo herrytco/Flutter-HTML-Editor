@@ -1,10 +1,13 @@
 import 'package:light_html_editor/api/regex_provider.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/api/v2/node_v2.dart';
+import 'package:light_html_editor/api/v2/parse_state.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 
 class Parser {
+  ///
   /// remove all tags from a HTML-Richtext and return the raw, unformatted text
+  ///
   static String cleanTagsFromRichtext(String text) {
     RegExpMatch? match = RegExProvider.tagRegex.firstMatch(text);
 
@@ -42,40 +45,46 @@ class Parser {
     NodeV2 root = NodeV2.root();
     if (rawText == null) return root;
 
-    _parseAndAddTo(root, rawText);
+    _parseAndAddTo(root, ParseState.fromRawText(rawText));
 
     return root;
   }
 
-  String _parseAndAddTo(NodeV2 k, String remainingText) {
-    while (remainingText.isNotEmpty) {
+  ParseState _parseAndAddTo(NodeV2 k, ParseState state) {
+    while (state.remainingText.isNotEmpty) {
       RegExpMatch? nextTagMatch =
-          RegExProvider.tagRegex.firstMatch(remainingText);
+          RegExProvider.tagRegex.firstMatch(state.remainingText);
 
       // no tags left, just plaintext
       if (nextTagMatch == null) {
-        k.children.add(SimpleNode(k, remainingText));
-        remainingText = "";
+        k.children.add(SimpleNode(k, state.textOffset, state.remainingText));
+        state.remainingText = "";
         break;
       }
 
       // a tag has been found - was it at string-start though?
       if (nextTagMatch.start > 0) {
         k.children.add(
-          SimpleNode(k, remainingText.substring(0, nextTagMatch.start)),
+          SimpleNode(
+            k,
+            state.textOffset,
+            state.remainingText.substring(0, nextTagMatch.start),
+          ),
         );
-        remainingText = remainingText.substring(nextTagMatch.start);
+        state.textOffset += nextTagMatch.start;
+        state.remainingText = state.remainingText.substring(nextTagMatch.start);
       } else {
-        Tag tag = Tag.decodeTag(
-            remainingText.substring(nextTagMatch.start, nextTagMatch.end));
+        Tag tag = Tag.decodeTag(state.remainingText
+            .substring(nextTagMatch.start, nextTagMatch.end));
 
         if (tag.isStart) {
           // encountered a start-tag
           NodeV2 nodeNew = NodeV2.fromTag(k, tag);
           k.children.add(nodeNew);
 
-          remainingText = remainingText.substring(tag.rawTagLength);
-          remainingText = _parseAndAddTo(nodeNew, remainingText);
+          state.textOffset += nextTagMatch.start + tag.rawTagLength;
+          state.remainingText = state.remainingText.substring(tag.rawTagLength);
+          state = _parseAndAddTo(nodeNew, state);
         } else {
           // encountered an end-tag
           if (k.tag != tag.name) {
@@ -83,12 +92,13 @@ class Parser {
                 "Unexpected end-tag! Expected '</${k.tag}>' but found '</${tag.name}>'");
           }
 
-          remainingText = remainingText.substring(tag.rawTagLength);
-          return remainingText;
+          state.textOffset += tag.rawTagLength;
+          state.remainingText = state.remainingText.substring(tag.rawTagLength);
+          return state;
         }
       }
     }
 
-    return remainingText;
+    return state;
   }
 }

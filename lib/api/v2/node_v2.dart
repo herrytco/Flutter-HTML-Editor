@@ -33,6 +33,32 @@ class NodeV2 {
     return "<$tag$props>";
   }
 
+  String get startTag {
+    if (tag.isEmpty) return "";
+
+    String startTag = "<$tag";
+
+    for (SimpleProperty property in properties) {
+      startTag += ' ${property.name}="${property.toHtml()};';
+      startTag += '"';
+    }
+
+    return "$startTag>";
+  }
+
+  String get endTag => tag.isEmpty ? "" : "</$tag>";
+
+  /// serializes the tree back to a HTML string
+  String toHtml() {
+    String html = startTag;
+
+    for (NodeV2 child in children) {
+      html += child.toHtml();
+    }
+
+    return html + endTag;
+  }
+
   NodeV2._(
     this.parent,
     this.tag,
@@ -60,7 +86,7 @@ class NodeV2 {
   }
 
   double? _fontSize(Map<String, double> tagSizes) {
-    // 1. check a dedicated style-tag
+    // 1. check if a dedicated style-property is set
     if (styleProperty != null) {
       if (styleProperty!.value["font-size"] != null)
         return double.tryParse(styleProperty!.value["font-size"]!);
@@ -71,24 +97,67 @@ class NodeV2 {
 
     return null;
   }
+
+  FontWeight? get _fontWeight {
+    // 1. check if a dedicated style-property is set
+    if (styleProperty != null) {
+      if (styleProperty!.value["font-weight"] != null) {
+        switch (styleProperty!.value["font-weight"]!) {
+          case "bold":
+            return FontWeight.bold;
+        }
+      }
+    }
+
+    // 2. check if it is a known tag
+    if (["h1", "h2", "h3", "h4", "h5", "h6", "b"].contains(tag))
+      return FontWeight.bold;
+
+    return null;
+  }
+
+  ///
+  /// find all nodes that have their [startIndex] >= [start] and [startIndex+body.length] <= [end]
+  ///
+  List<SimpleNode> getNodesInSelection(int start, int end) {
+    List<SimpleNode> result = [];
+
+    List<NodeV2> toCheck = [this];
+
+    while (toCheck.isNotEmpty) {
+      NodeV2 k = toCheck[0];
+      toCheck.remove(k);
+
+      if (k is SimpleNode) {
+        if (k.startIndex >= start && k.endIndex <= end) result.add(k);
+      } else {
+        toCheck.addAll(k.children);
+      }
+    }
+
+    return result;
+  }
 }
 
 class SimpleNode extends NodeV2 {
   final String body;
 
+  final int startIndex;
+  int get endIndex => startIndex + body.length;
+
+  @override
+  String get prettyTag => super.prettyTag + "(l:$startIndex)";
+
+  @override
+  String toHtml() => body;
+
   FontWeight get fontWeight {
     NodeV2? k = this;
 
     while (k != null) {
-      if (k.tag == "b" || k.tag.startsWith("h")) return FontWeight.bold;
+      FontWeight? localWeight = k._fontWeight;
 
-      if (k.styleProperty != null) {
-        StyleProperty prop = k.styleProperty!;
-
-        dynamic weight = prop.getProperty("font-weight");
-
-        if (weight == "bold") return FontWeight.bold;
-      }
+      if (localWeight != null) return localWeight;
 
       k = k.parent;
     }
@@ -220,12 +289,15 @@ class SimpleNode extends NodeV2 {
     return null;
   }
 
-  SimpleNode(NodeV2 parent, this.body) : super._(parent, "", []);
+  SimpleNode(NodeV2 parent, this.startIndex, this.body)
+      : super._(parent, "", []);
 }
 
 class SimpleProperty {
   final String name;
   final dynamic value;
+
+  String toHtml() => value;
 
   SimpleProperty(this.name, this.value);
 }
@@ -238,6 +310,19 @@ class StyleProperty extends SimpleProperty {
     Map<String, dynamic> p = value;
 
     return p[key];
+  }
+
+  @override
+  String toHtml() {
+    String result = "";
+
+    Map<String, dynamic> p = value;
+
+    for (String key in p.keys) {
+      result += "$key:${p[key]}";
+    }
+
+    return result;
   }
 
   factory StyleProperty.fromStyleString(String styleString) {

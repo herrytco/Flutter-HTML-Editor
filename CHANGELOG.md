@@ -1,7 +1,9 @@
-## 0.0.30
+## 0.0.21
 
 * Implemented a new parser to convert the raw HTML into a tree
 * `Parser.cleanTagsFromRichtext(String)` and `Parser.replaceVariables(String, List<RichTextPlaceholder>, String)` are now static methods
+* Added serialization of a `NodeV2` back to HTML enabling operations on the DOM directly instead of operating on the raw HTML
+* Added a parse-step for each keystroke resulting in a sort-of autocomplete while typing
 
 ## 0.0.20
 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:light_html_editor/api/parser.dart';
-import 'package:light_html_editor/api/v2/printer.dart';
 import 'package:light_html_editor/button_row.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/light_html_editor.dart';
@@ -117,6 +115,14 @@ class _RichTextEditorState extends State<RichTextEditor> {
           _areButtonsVisible = _focusNode.hasFocus;
         });
       });
+
+    _controller.addListener(() {
+      String reparsed = Parser().parse(_controller.text).toHtml();
+
+      _controller.value = _controller.value.copyWith(
+        text: reparsed,
+      );
+    });
 
     _controller.addListener(() {
       setState(() {

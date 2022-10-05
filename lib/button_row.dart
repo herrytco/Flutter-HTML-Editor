@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/api/operations/tag_operation.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/html_editor_controller.dart';
 import 'package:light_html_editor/ui/buttons/color_button.dart';
@@ -43,10 +44,11 @@ class ButtonRow extends StatelessWidget {
   void _onH3() => controller.wrapWithTag("h3");
 
   /// wraps the current selection with <span style="color:[hex]"></span>
-  void _onColor(String hex) =>
-      controller.wrapWithStartAndEnd('<span style="color:$hex;">', '</span>');
+  void _onColor(String hex) => controller.wrapWithStartAndEnd(
+      TagOperation('<span style="color:$hex;">', '</span>'));
 
-  void _onLink() => controller.wrapWithStartAndEnd('<a href="">', '</a>');
+  void _onLink() =>
+      controller.wrapWithStartAndEnd(TagOperation('<a href="">', '</a>'));
 
   void _onUndo() => controller.undo();
 
