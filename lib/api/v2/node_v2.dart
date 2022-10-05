@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/data/color_utils.dart';
@@ -9,6 +11,46 @@ class NodeV2 {
 
   final NodeV2? parent;
   final List<NodeV2> children = [];
+
+  int startIndex = 0, endIndex = 0;
+
+  NodeV2._(
+    this.parent,
+    this.tag,
+    this.properties,
+  );
+
+  factory NodeV2.root() {
+    return NodeV2._(null, "", []);
+  }
+
+  factory NodeV2.fromTag(NodeV2 parent, Tag tag) {
+    List<SimpleProperty> properties = [];
+
+    for (String propertyKey in tag.properties.keys) {
+      if (propertyKey == "style") {
+        properties
+            .add(StyleProperty.fromStyleString(tag.properties[propertyKey]));
+      } else {
+        properties
+            .add(SimpleProperty(propertyKey, tag.properties[propertyKey]));
+      }
+    }
+
+    return NodeV2._(parent, tag.name, properties);
+  }
+
+  void _recalcIndices() {
+    startIndex = children.map((e) => e.startIndex).reduce(min);
+    endIndex = children.map((e) => e.endIndex).reduce(max);
+
+    if (parent != null) parent!._recalcIndices();
+  }
+
+  void addChild(NodeV2 node) {
+    children.add(node);
+    _recalcIndices();
+  }
 
   StyleProperty? _cacheStyleProperty;
 
@@ -57,32 +99,6 @@ class NodeV2 {
     }
 
     return html + endTag;
-  }
-
-  NodeV2._(
-    this.parent,
-    this.tag,
-    this.properties,
-  );
-
-  factory NodeV2.root() {
-    return NodeV2._(null, "", []);
-  }
-
-  factory NodeV2.fromTag(NodeV2 parent, Tag tag) {
-    List<SimpleProperty> properties = [];
-
-    for (String propertyKey in tag.properties.keys) {
-      if (propertyKey == "style") {
-        properties
-            .add(StyleProperty.fromStyleString(tag.properties[propertyKey]));
-      } else {
-        properties
-            .add(SimpleProperty(propertyKey, tag.properties[propertyKey]));
-      }
-    }
-
-    return NodeV2._(parent, tag.name, properties);
   }
 
   double? _fontSize(Map<String, double> tagSizes) {

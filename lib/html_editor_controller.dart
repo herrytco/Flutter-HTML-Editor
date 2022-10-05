@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/api/operations/property_operation.dart';
 import 'package:light_html_editor/api/operations/tag_operation.dart';
 import 'package:light_html_editor/api/parser.dart';
+import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/api/v2/node_v2.dart';
 
 class HtmlEditorController extends TextEditingController {
@@ -94,6 +96,13 @@ class HtmlEditorController extends TextEditingController {
   }
 
   ///
+  /// Adds a style-property to the current selection of text. If there is an
+  /// existing tag around the exact selection, the property gets added to this
+  /// tag. A <span>-tag will be created otherwise.
+  ///
+  void insertStyleProperty(StylePropertyOperation op) {}
+
+  ///
   /// Wraps the current text-selection with the provided tags. If no text is
   /// selected, an empty tag-pair is inserted at the current cursor position.
   /// If the field is not focused, the empty tag-pair is appended to the current
@@ -107,10 +116,38 @@ class HtmlEditorController extends TextEditingController {
 
     op.setSelection(selection);
 
-    String before = text;
-    String after = op.applyOperationTo(text);
+    NodeV2 tree = Parser().parse(text);
 
-    text = Parser().parse(after).toHtml();
+    List<SimpleNode> affectedNodes =
+        tree.getNodesInSelection(op.start!, op.end!);
+
+    for (SimpleNode affectedNode in affectedNodes) {
+      NodeV2 affectedParent = affectedNode.parent!;
+
+      // print("selection: ${op.start} - ${op.end}");
+      // print(
+      //     "node range: ${affectedNode.startIndex} - ${affectedNode.endIndex}");
+
+      // selection fully contains a node -> insert the attribute in its parent
+      if (op.start! <= affectedNode.startIndex &&
+          op.end! >= affectedNode.endIndex) {
+        NodeV2 parentNew = NodeV2.fromTag(
+          affectedParent,
+          Tag.decodeTag(op.startTag),
+        );
+
+        affectedParent.children[affectedParent.children.indexOf(affectedNode)] =
+            parentNew;
+        parentNew.children.add(affectedNode);
+      }
+    }
+
+    String before = text;
+    // String after = op.applyOperationTo(text);
+
+    text = tree.toHtml();
+
+    return;
 
     if (editorFocusNode != null) {
       editorFocusNode!.requestFocus();
@@ -151,8 +188,6 @@ class HtmlEditorController extends TextEditingController {
       );
     }
   }
-
-  void insertStyleProperty(StyleProperty prop) {}
 
   void _cache() {
     _cachedText = text;

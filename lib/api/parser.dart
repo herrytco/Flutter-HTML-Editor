@@ -57,14 +57,14 @@ class Parser {
 
       // no tags left, just plaintext
       if (nextTagMatch == null) {
-        k.children.add(SimpleNode(k, state.textOffset, state.remainingText));
+        k.addChild(SimpleNode(k, state.textOffset, state.remainingText));
         state.remainingText = "";
         break;
       }
 
       // a tag has been found - was it at string-start though?
       if (nextTagMatch.start > 0) {
-        k.children.add(
+        k.addChild(
           SimpleNode(
             k,
             state.textOffset,
@@ -80,7 +80,7 @@ class Parser {
         if (tag.isStart) {
           // encountered a start-tag
           NodeV2 nodeNew = NodeV2.fromTag(k, tag);
-          k.children.add(nodeNew);
+          k.addChild(nodeNew);
 
           state.textOffset += nextTagMatch.start + tag.rawTagLength;
           state.remainingText = state.remainingText.substring(tag.rawTagLength);
