@@ -3,7 +3,9 @@
 * Implemented a new parser to convert the raw HTML into a tree
 * `Parser.cleanTagsFromRichtext(String)` and `Parser.replaceVariables(String, List<RichTextPlaceholder>, String)` are now static methods
 * Added serialization of a `NodeV2` back to HTML enabling operations on the DOM directly instead of operating on the raw HTML
-* Added a parse-step for each keystroke resulting in a sort-of autocomplete while typing
+* Added graph analysis steps to not add unneccessary `<span>` tags if there is already a wrapping tag present
+* Added property-operations. These add a property (currently style="..." to an existing tag, if the selection encloses a node fully).
+* Added multi-node operations. If a random section of text is selected, multiple tags are added to the text in order to not break the DOM.
 
 ## 0.0.20
 
