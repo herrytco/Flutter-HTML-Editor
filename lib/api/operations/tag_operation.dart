@@ -5,17 +5,19 @@ import 'package:flutter/material.dart';
 class TagOperation {
   final String startTag;
   final String endTag;
+  final String tagName;
+
   int? start;
   int? end;
 
-  TagOperation(this.startTag, this.endTag);
+  TagOperation(this.startTag, this.endTag, this.tagName);
 
   bool get isPunctual => start == end;
   bool get isNoSelection => start == -1 && end == -1;
 
   void setSelection(TextSelection selection) {
-    start = min(selection.baseOffset, selection.extentOffset);
-    end = max(selection.baseOffset, selection.extentOffset);
+    start = min(selection.baseOffset, selection.extentOffset - 1);
+    end = max(selection.baseOffset, selection.extentOffset - 1);
   }
 
   String applyOperationTo(String text) {
@@ -51,9 +53,5 @@ class TagOperation {
     }
 
     return after;
-  }
-
-  factory TagOperation.fromTagAndSelection(String startTag, String endTag) {
-    return TagOperation(startTag, endTag);
   }
 }
