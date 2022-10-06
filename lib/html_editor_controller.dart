@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/operations/property_operation.dart';
 import 'package:light_html_editor/api/operations/tag_operation.dart';
@@ -92,7 +94,7 @@ class HtmlEditorController extends TextEditingController {
     String startTag = "<$tagName>";
     String endTag = "</$tagName>";
 
-    wrapWithStartAndEnd(TagOperation(startTag, endTag));
+    wrapWithStartAndEnd(TagOperation(startTag, endTag, tagName));
   }
 
   ///
@@ -100,7 +102,80 @@ class HtmlEditorController extends TextEditingController {
   /// existing tag around the exact selection, the property gets added to this
   /// tag. A <span>-tag will be created otherwise.
   ///
-  void insertStyleProperty(StylePropertyOperation op) {}
+  void insertStyleProperty(StylePropertyOperation op) {
+    _cache();
+
+    op.setSelection(selection);
+
+    NodeV2 tree = Parser().parse(text);
+
+    List<SimpleNode> affectedNodes =
+        tree.getNodesInSelection(op.start!, op.end!);
+
+    for (SimpleNode affectedNode in affectedNodes) {
+      NodeV2 affectedParent = affectedNode.parent!;
+
+      // selection fully contains a node -> insert the attribute in its parent
+      if (op.start! <= affectedNode.startIndex &&
+          op.end! >= affectedNode.endIndex) {
+        if (affectedParent is SimpleNode || affectedParent.tag.isEmpty) {
+          _insertTagNodeBetween(affectedParent, affectedNode,
+              TagOperation('<span $op>', '</span>', 'span'));
+        } else {
+          _extendNodeWithStyle(affectedParent, op);
+        }
+      }
+      // selection is only partially in a node -> split it into at least 2
+      else {
+        int opEnd = op.end!;
+
+        int startLocal = max(0, op.start! - affectedNode.startIndex);
+        int endLocal =
+            min(opEnd - affectedNode.startIndex, affectedNode.body.length - 1);
+
+        List<String> bodyParts = [
+          affectedNode.body.substring(0, startLocal),
+          affectedNode.body.substring(startLocal, endLocal + 1),
+          affectedNode.body.substring(endLocal + 1),
+        ];
+
+        int offsetChild = affectedNode.startIndex;
+        int startIndex = affectedParent.children.indexOf(affectedNode);
+        affectedParent.children.remove(affectedNode);
+
+        for (String part in bodyParts) {
+          if (part.isEmpty) continue;
+
+          var childNew = SimpleNode(affectedParent, offsetChild, part);
+          offsetChild += part.length;
+
+          affectedParent.addChild(childNew, startIndex++);
+
+          // check if the new child is affected
+          if (op.start! <= childNew.startIndex &&
+              op.end! >= childNew.endIndex) {
+            // fully enclosed
+            if (op.start! <= childNew.startIndex &&
+                op.end! >= childNew.endIndex) {
+              _insertTagNodeBetween(affectedParent, childNew,
+                  TagOperation('<span $op>', '</span>', 'span'));
+            }
+          }
+        }
+      }
+    }
+
+    text = tree.toHtml();
+  }
+
+  void _extendNodeWithStyle(NodeV2 node, StylePropertyOperation op) {
+    if (node.styleProperty == null) {
+      node.properties.add(StyleProperty.fromStyleString(
+          "${op.propertyKey}:${op.propertyValue}"));
+    } else {
+      node.styleProperty!.putProperty(op.propertyKey, op.propertyValue);
+    }
+  }
 
   ///
   /// Wraps the current text-selection with the provided tags. If no text is
@@ -124,69 +199,60 @@ class HtmlEditorController extends TextEditingController {
     for (SimpleNode affectedNode in affectedNodes) {
       NodeV2 affectedParent = affectedNode.parent!;
 
-      // print("selection: ${op.start} - ${op.end}");
-      // print(
-      //     "node range: ${affectedNode.startIndex} - ${affectedNode.endIndex}");
-
       // selection fully contains a node -> insert the attribute in its parent
       if (op.start! <= affectedNode.startIndex &&
           op.end! >= affectedNode.endIndex) {
-        NodeV2 parentNew = NodeV2.fromTag(
-          affectedParent,
-          Tag.decodeTag(op.startTag),
-        );
+        _insertTagNodeBetween(affectedParent, affectedNode, op);
+      }
+      // selection is only partially in a node -> split it into at least 2
+      else {
+        int opEnd = op.end!;
 
-        affectedParent.children[affectedParent.children.indexOf(affectedNode)] =
-            parentNew;
-        parentNew.children.add(affectedNode);
+        int startLocal = max(0, op.start! - affectedNode.startIndex);
+        int endLocal =
+            min(opEnd - affectedNode.startIndex, affectedNode.body.length - 1);
+
+        List<String> bodyParts = [
+          affectedNode.body.substring(0, startLocal),
+          affectedNode.body.substring(startLocal, endLocal + 1),
+          affectedNode.body.substring(endLocal + 1),
+        ];
+
+        int offsetChild = affectedNode.startIndex;
+        int startIndex = affectedParent.children.indexOf(affectedNode);
+        affectedParent.children.remove(affectedNode);
+
+        for (String part in bodyParts) {
+          if (part.isEmpty) continue;
+
+          var childNew = SimpleNode(affectedParent, offsetChild, part);
+          offsetChild += part.length;
+
+          affectedParent.addChild(childNew, startIndex++);
+
+          // check if the new child is affected
+          if (op.start! <= childNew.startIndex &&
+              op.end! >= childNew.endIndex) {
+            _insertTagNodeBetween(affectedParent, childNew, op);
+          }
+        }
       }
     }
-
-    String before = text;
-    // String after = op.applyOperationTo(text);
 
     text = tree.toHtml();
+  }
 
-    return;
+  void _insertTagNodeBetween(NodeV2 parent, NodeV2 child, TagOperation op) {
+    // ignore the operation if the parent already has the correct type
+    if (parent.tag == op.tagName) return;
 
-    if (editorFocusNode != null) {
-      editorFocusNode!.requestFocus();
-    }
+    NodeV2 parentNew = NodeV2.fromTag(
+      parent,
+      Tag.decodeTag(op.startTag),
+    );
 
-    // adjust selection
-    if (before.length == 0) {
-      selection = TextSelection(
-        baseOffset: op.startTag.length,
-        extentOffset: op.startTag.length,
-      );
-    } else if (op.start == -1 && op.end == -1) {
-      selection = TextSelection(
-        baseOffset: "$before${op.startTag}".length,
-        extentOffset: "$before${op.startTag}".length,
-      );
-    } else if (op.start == op.end) {
-      if (op.start == 0)
-        selection = TextSelection(
-          baseOffset: op.startTag.length,
-          extentOffset: op.startTag.length,
-        );
-      else {
-        String a = before.substring(0, op.start);
-
-        selection = TextSelection(
-          baseOffset: "$a${op.startTag}".length,
-          extentOffset: "$a${op.startTag}".length,
-        );
-      }
-    } else {
-      String a = before.substring(0, op.start);
-      String b = before.substring(op.start!, op.end);
-
-      selection = TextSelection(
-        baseOffset: "$a${op.startTag}".length,
-        extentOffset: "$a${op.startTag}$b".length,
-      );
-    }
+    parent.children[parent.children.indexOf(child)] = parentNew;
+    parentNew.children.add(child);
   }
 
   void _cache() {

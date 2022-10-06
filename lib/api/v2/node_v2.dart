@@ -3,15 +3,27 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/data/color_utils.dart';
+import 'package:light_html_editor/data/text_constants.dart';
 
+///
+/// Representation of a node in the DOM. This class contains everything passed
+/// in the HTML text and can be serialized to valid HTML
+///
 class NodeV2 {
+  /// tag-type. A "<a>" tag in HTML would result in the value of "a"
   final String tag;
 
+  /// text-properties of the tag
   final List<SimpleProperty> properties;
 
+  /// Parent node. All nodes in the DOM except the root node will have a parent
   final NodeV2? parent;
+
+  /// Children nodes.
   final List<NodeV2> children = [];
 
+  /// markers on which positions in the source-code the actual text starts/ends
+  /// both indices are inclusive values
   int startIndex = 0, endIndex = 0;
 
   NodeV2._(
@@ -20,10 +32,12 @@ class NodeV2 {
     this.properties,
   );
 
+  /// constructs an empty node with a null parent
   factory NodeV2.root() {
     return NodeV2._(null, "", []);
   }
 
+  /// creates a node from a parent and a tag.
   factory NodeV2.fromTag(NodeV2 parent, Tag tag) {
     List<SimpleProperty> properties = [];
 
@@ -40,6 +54,8 @@ class NodeV2 {
     return NodeV2._(parent, tag.name, properties);
   }
 
+  /// assigns this node the min/max value of all child start/end indices and
+  /// triggers a recalc in the parent as well
   void _recalcIndices() {
     startIndex = children.map((e) => e.startIndex).reduce(min);
     endIndex = children.map((e) => e.endIndex).reduce(max);
@@ -47,13 +63,23 @@ class NodeV2 {
     if (parent != null) parent!._recalcIndices();
   }
 
-  void addChild(NodeV2 node) {
-    children.add(node);
+  /// adds a child-node to this node at an optional position. Triggers a recalc
+  /// of node indices
+  void addChild(NodeV2 node, [int? position]) {
+    if (position == null) {
+      children.add(node);
+    } else {
+      children.insert(position, node);
+    }
+
     _recalcIndices();
   }
 
+  /// cache for the style-property to avoid unneccessary searches
   StyleProperty? _cacheStyleProperty;
 
+  /// returns the cached style (if present), searches for it in the properties
+  /// otherwise
   StyleProperty? get styleProperty {
     if (_cacheStyleProperty == null) {
       List<StyleProperty> style =
@@ -65,6 +91,7 @@ class NodeV2 {
     return _cacheStyleProperty;
   }
 
+  /// returns a prettier version of the tag (no HTML)
   String get prettyTag {
     String props = "";
 
@@ -75,32 +102,36 @@ class NodeV2 {
     return "<$tag$props>";
   }
 
-  String get startTag {
+  /// creates a valid start-tag representation for this node (HTML)
+  String get startHtmlTag {
     if (tag.isEmpty) return "";
 
     String startTag = "<$tag";
 
     for (SimpleProperty property in properties) {
-      startTag += ' ${property.name}="${property.toHtml()};';
+      startTag += ' ${property.name}="${property.toHtml()}';
       startTag += '"';
     }
 
     return "$startTag>";
   }
 
-  String get endTag => tag.isEmpty ? "" : "</$tag>";
+  /// creates a valid end-tag representation for this node (HTML)
+  String get endHtmlTag => tag.isEmpty ? "" : "</$tag>";
 
   /// serializes the tree back to a HTML string
   String toHtml() {
-    String html = startTag;
+    String html = startHtmlTag;
 
     for (NodeV2 child in children) {
       html += child.toHtml();
     }
 
-    return html + endTag;
+    return html + endHtmlTag;
   }
 
+  /// checks if information about font-size exist in this node and returns them,
+  /// null otherwise
   double? _fontSize(Map<String, double> tagSizes) {
     // 1. check if a dedicated style-property is set
     if (styleProperty != null) {
@@ -114,6 +145,8 @@ class NodeV2 {
     return null;
   }
 
+  /// checks if information about font-weight exist in this node and returns them,
+  /// null otherwise
   FontWeight? get _fontWeight {
     // 1. check if a dedicated style-property is set
     if (styleProperty != null) {
@@ -132,6 +165,25 @@ class NodeV2 {
     return null;
   }
 
+  /// checks if information about font-style exist in this node and returns them,
+  /// null otherwise
+  FontStyle? get _fontStyle {
+    // 1. check if a dedicated style-property is set
+    if (styleProperty != null) {
+      if (styleProperty!.value["font-style"] != null) {
+        switch (styleProperty!.value["font-style"]!) {
+          case "italic":
+            return FontStyle.italic;
+        }
+      }
+    }
+
+    // 2. check if it is a known tag
+    if (["i"].contains(tag)) return FontStyle.italic;
+
+    return null;
+  }
+
   ///
   /// find all nodes that have their [startIndex] >= [start] and [startIndex+body.length] <= [end]
   ///
@@ -145,7 +197,10 @@ class NodeV2 {
       toCheck.remove(k);
 
       if (k is SimpleNode) {
-        if (k.startIndex >= start && k.endIndex <= end) result.add(k);
+        // full selection
+        if ((k.startIndex <= start && start <= k.endIndex) ||
+            (k.startIndex <= end && end <= k.endIndex) ||
+            (start <= k.startIndex && k.endIndex <= end)) result.add(k);
       } else {
         toCheck.addAll(k.children);
       }
@@ -155,11 +210,17 @@ class NodeV2 {
   }
 }
 
+/// Represents a leaf-node in the DOM. This node only contains text and is used
+/// to separate styling logic from the actual textual information
 class SimpleNode extends NodeV2 {
+  /// Text contained in the node. Unstructured plaintext containing no HTML
   final String body;
 
+  /// Index of the first text character
   final int startIndex;
-  int get endIndex => startIndex + body.length;
+
+  /// Index of the last text character
+  int get endIndex => startIndex + (body.length - 1);
 
   @override
   String get prettyTag => super.prettyTag + "(l:$startIndex)";
@@ -167,6 +228,26 @@ class SimpleNode extends NodeV2 {
   @override
   String toHtml() => body;
 
+  /// Searches the path to the root for the first occurance of a node with a
+  /// font-style information. Returns [FontStyle.normal] if no information is
+  /// present
+  FontStyle get fontStyle {
+    NodeV2? k = this;
+
+    while (k != null) {
+      FontStyle? localStyle = k._fontStyle;
+
+      if (localStyle != null) return localStyle;
+
+      k = k.parent;
+    }
+
+    return FontStyle.normal;
+  }
+
+  /// Searches the path to the root for the first occurance of a node with a
+  /// font-weight information. Returns [FontWeight.normal] if no information is
+  /// present
   FontWeight get fontWeight {
     NodeV2? k = this;
 
@@ -181,6 +262,9 @@ class SimpleNode extends NodeV2 {
     return FontWeight.normal;
   }
 
+  /// Searches the path to the root for the first occurance of a node with a
+  /// text-decoration information. Returns [TextDecoration.none] if no
+  /// information is present
   TextDecoration get textDecoration {
     NodeV2? k = this;
 
@@ -210,6 +294,9 @@ class SimpleNode extends NodeV2 {
     return TextDecoration.none;
   }
 
+  /// Searches the path to the root for the first occurance of a node with a
+  /// font-family information. Returns [null] if no information is
+  /// present
   String? get fontFamily {
     NodeV2? k = this;
 
@@ -228,6 +315,10 @@ class SimpleNode extends NodeV2 {
     return null;
   }
 
+  /// Searches the path to the root for the first occurance of a node with a
+  /// font-size information. The parameter is a map of tagNames to default
+  /// font-sizes. This map must contain an entry for [""], which is used
+  /// if no information is found.
   double fontSize(Map<String, double> sizes) {
     NodeV2? k = parent;
 
@@ -242,16 +333,44 @@ class SimpleNode extends NodeV2 {
     return sizes[""]!;
   }
 
-  bool get isLink => hasTagInPath("a");
+  /// Searches the path to the root for the first occurance of a node with a
+  /// color information. Returns [null] if no information is present
+  Color? get textColor {
+    NodeV2? k = this;
 
-  bool get isHeader {
-    return parent!.tag.startsWith("h");
+    while (k != null) {
+      if (k.styleProperty != null) {
+        StyleProperty prop = k.styleProperty!;
+
+        dynamic color = prop.getProperty("color");
+
+        if (color != null) {
+          try {
+            return ColorUtils.colorForHex(color);
+          } catch (e) {
+            return TextConstants.defaultColor;
+          }
+        }
+      }
+
+      k = k.parent;
+    }
+
+    return null;
   }
 
+  /// is true, iff the node is an "a" node
+  bool get isLink => hasTagInPath("a");
+
+  /// is true, iff the tagname starts with an "h"
+  bool get isHeader => parent!.tag.startsWith("h");
+
+  /// is true, iff the node is an "p" node
   bool get isParagraph {
     return parent!.tag == "p";
   }
 
+  /// contains the content of the "href" attribute, if present, null otherwise
   String? get linkTarget {
     NodeV2? k = this;
 
@@ -273,8 +392,11 @@ class SimpleNode extends NodeV2 {
     return null;
   }
 
+  /// searches the path for a specific tag [tag]
   bool hasTagInPath(String tag) => hasAnyTagInPath([tag]);
 
+  /// searches the path for any tag specified in [tags] and returns true, iff
+  /// one of the parent nodes contains at least one of these tags
   bool hasAnyTagInPath(List<String> tags) {
     NodeV2? k = this;
 
@@ -287,30 +409,23 @@ class SimpleNode extends NodeV2 {
     return false;
   }
 
-  Color? get textColor {
-    NodeV2? k = this;
-
-    while (k != null) {
-      if (k.styleProperty != null) {
-        StyleProperty prop = k.styleProperty!;
-
-        dynamic color = prop.getProperty("color");
-
-        if (color != null) return ColorUtils.colorForHex(color);
-      }
-
-      k = k.parent;
-    }
-
-    return null;
-  }
-
   SimpleNode(NodeV2 parent, this.startIndex, this.body)
       : super._(parent, "", []);
+
+  @override
+  String toString() {
+    return "<>$body</>";
+  }
 }
 
+/// Contains information about a specific property of a tag.
 class SimpleProperty {
+  /// Name of the property. href="http://www.example.com" would have a name of
+  /// "href"
   final String name;
+
+  /// Value of the property. href="http://www.example.com" would have a value of
+  /// "http://www.example.com"
   final dynamic value;
 
   String toHtml() => value;
@@ -318,10 +433,21 @@ class SimpleProperty {
   SimpleProperty(this.name, this.value);
 }
 
+/// Contains information of a specific style-attribute in a node. This class is
+/// used to retrieve/add specific styling values from/to the attribute
 class StyleProperty extends SimpleProperty {
   StyleProperty._(Map<String, dynamic> styleProperties)
       : super("style", styleProperties);
 
+  /// adds a new property to the attribute, overwrites the value set if it
+  /// already exists
+  void putProperty(String key, String sValue) {
+    Map<String, dynamic> p = value;
+
+    p[key] = sValue;
+  }
+
+  /// Searches for a specific property. Returns null if it does not exist.
   dynamic getProperty(String key) {
     Map<String, dynamic> p = value;
 
@@ -334,13 +460,22 @@ class StyleProperty extends SimpleProperty {
 
     Map<String, dynamic> p = value;
 
+    bool first = true;
+
     for (String key in p.keys) {
+      if (!first)
+        result += ";";
+      else
+        first = false;
+
       result += "$key:${p[key]}";
     }
 
     return result;
   }
 
+  /// Decodes a style string to a specific map. This string can look like the
+  /// following value: "font-size:12;color:#ffffff"
   factory StyleProperty.fromStyleString(String styleString) {
     Map<String, dynamic> styleProperties = {};
 

@@ -78,8 +78,13 @@ class TextRenderer {
   ) {
     _initFontStyles();
 
-    NodeV2 root = Parser().parse(rawHtml);
-    _proccessNode(root);
+    try {
+      NodeV2 root = Parser().parse(rawHtml);
+      _proccessNode(root);
+    } catch (e) {
+      // TODO add proper error handling
+      // do nothing for now
+    }
 
     int textLength = 0;
     bool full = false;
@@ -219,7 +224,7 @@ class TextRenderer {
             fontSize: node.fontSize(_fontSizes),
             fontFamily: node.fontFamily ?? _fontFamilies[""],
             fontWeight: node.fontWeight,
-            fontStyle: FontStyle.normal,
+            fontStyle: node.fontStyle,
             color: _color(node),
             decoration: _textDecoration(node),
           ),
