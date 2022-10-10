@@ -10,8 +10,12 @@ import 'package:light_html_editor/data/text_constants.dart';
 /// in the HTML text and can be serialized to valid HTML
 ///
 class NodeV2 {
-  /// tag-type. A "<a>" tag in HTML would result in the value of "a"
-  final String tag;
+  /// tag-type. A '<a href="abcd">' tag in HTML would result in the value of "a"
+  final String tagName;
+
+  /// full tag specification. A '<a href="abcd">' tag in HTML would result in
+  /// the value of '<a href="abcd">'
+  final String fullTag;
 
   /// text-properties of the tag
   final List<SimpleProperty> properties;
@@ -24,17 +28,31 @@ class NodeV2 {
 
   /// markers on which positions in the source-code the actual text starts/ends
   /// both indices are inclusive values
-  int startIndex = 0, endIndex = 0;
+  int _textIndexStart = 0, _textIndexEnd = 0;
+
+  int get textIndexStart => _textIndexStart;
+
+  set textIndexStart(int value) {
+    _textIndexStart = value;
+
+    if (this is SimpleNode) parent?._recalcIndices();
+  }
+
+  int get textIndexEnd => _textIndexEnd;
+
+  /// markers on which position in the source-code this node starts/ends
+  int nodeIndexStart = 0, nodeIndexEnd = 0;
 
   NodeV2._(
     this.parent,
-    this.tag,
+    this.tagName,
+    this.fullTag,
     this.properties,
   );
 
   /// constructs an empty node with a null parent
   factory NodeV2.root() {
-    return NodeV2._(null, "", []);
+    return NodeV2._(null, "", "", []);
   }
 
   /// creates a node from a parent and a tag.
@@ -51,14 +69,17 @@ class NodeV2 {
       }
     }
 
-    return NodeV2._(parent, tag.name, properties);
+    return NodeV2._(parent, tag.name, tag.rawTag, properties);
   }
 
   /// assigns this node the min/max value of all child start/end indices and
   /// triggers a recalc in the parent as well
   void _recalcIndices() {
-    startIndex = children.map((e) => e.startIndex).reduce(min);
-    endIndex = children.map((e) => e.endIndex).reduce(max);
+    textIndexStart = children.map((e) => e.textIndexStart).reduce(min);
+    _textIndexEnd = children.map((e) => e.textIndexEnd).reduce(max);
+
+    nodeIndexStart = textIndexStart - fullTag.length;
+    nodeIndexEnd = textIndexEnd + "$endHtmlTag".length;
 
     if (parent != null) parent!._recalcIndices();
   }
@@ -99,14 +120,14 @@ class NodeV2 {
       props += " ${p.name}:${p.value}";
     }
 
-    return "<$tag$props>";
+    return "<$tagName$props>";
   }
 
   /// creates a valid start-tag representation for this node (HTML)
   String get startHtmlTag {
-    if (tag.isEmpty) return "";
+    if (tagName.isEmpty) return "";
 
-    String startTag = "<$tag";
+    String startTag = "<$tagName";
 
     for (SimpleProperty property in properties) {
       startTag += ' ${property.name}="${property.toHtml()}';
@@ -117,7 +138,7 @@ class NodeV2 {
   }
 
   /// creates a valid end-tag representation for this node (HTML)
-  String get endHtmlTag => tag.isEmpty ? "" : "</$tag>";
+  String get endHtmlTag => tagName.isEmpty ? "" : "</$tagName>";
 
   /// serializes the tree back to a HTML string
   String toHtml() {
@@ -140,7 +161,7 @@ class NodeV2 {
     }
 
     // 2. check if it is a predefined tag
-    if (tagSizes.containsKey(tag)) return tagSizes[tag]!;
+    if (tagSizes.containsKey(tagName)) return tagSizes[tagName]!;
 
     return null;
   }
@@ -159,7 +180,7 @@ class NodeV2 {
     }
 
     // 2. check if it is a known tag
-    if (["h1", "h2", "h3", "h4", "h5", "h6", "b"].contains(tag))
+    if (["h1", "h2", "h3", "h4", "h5", "h6", "b"].contains(tagName))
       return FontWeight.bold;
 
     return null;
@@ -179,13 +200,13 @@ class NodeV2 {
     }
 
     // 2. check if it is a known tag
-    if (["i"].contains(tag)) return FontStyle.italic;
+    if (["i"].contains(tagName)) return FontStyle.italic;
 
     return null;
   }
 
   ///
-  /// find all nodes that have their [startIndex] >= [start] and [startIndex+body.length] <= [end]
+  /// find all nodes that have their [textIndexStart] >= [start] and [startIndex+body.length] <= [end]
   ///
   List<SimpleNode> getNodesInSelection(int start, int end) {
     List<SimpleNode> result = [];
@@ -198,9 +219,9 @@ class NodeV2 {
 
       if (k is SimpleNode) {
         // full selection
-        if ((k.startIndex <= start && start <= k.endIndex) ||
-            (k.startIndex <= end && end <= k.endIndex) ||
-            (start <= k.startIndex && k.endIndex <= end)) result.add(k);
+        if ((k.textIndexStart <= start && start <= k.textIndexEnd) ||
+            (k.textIndexStart <= end && end <= k.textIndexEnd) ||
+            (start <= k.textIndexStart && k.textIndexEnd <= end)) result.add(k);
       } else {
         toCheck.addAll(k.children);
       }
@@ -216,14 +237,11 @@ class SimpleNode extends NodeV2 {
   /// Text contained in the node. Unstructured plaintext containing no HTML
   final String body;
 
-  /// Index of the first text character
-  final int startIndex;
-
   /// Index of the last text character
-  int get endIndex => startIndex + (body.length - 1);
+  int get textIndexEnd => textIndexStart + (body.length - 1);
 
   @override
-  String get prettyTag => super.prettyTag + "(l:$startIndex)";
+  String get prettyTag => super.prettyTag;
 
   @override
   String toHtml() => body;
@@ -269,7 +287,7 @@ class SimpleNode extends NodeV2 {
     NodeV2? k = this;
 
     while (k != null) {
-      if (k.tag == "u") return TextDecoration.underline;
+      if (k.tagName == "u") return TextDecoration.underline;
 
       if (k.styleProperty != null) {
         StyleProperty prop = k.styleProperty!;
@@ -379,11 +397,11 @@ class SimpleNode extends NodeV2 {
   bool get isLink => hasTagInPath("a");
 
   /// is true, iff the tagname starts with an "h"
-  bool get isHeader => parent!.tag.startsWith("h");
+  bool get isHeader => parent!.tagName.startsWith("h");
 
   /// is true, iff the node is an "p" node
   bool get isParagraph {
-    return parent!.tag == "p";
+    return parent!.tagName == "p";
   }
 
   /// contains the content of the "href" attribute, if present, null otherwise
@@ -391,7 +409,7 @@ class SimpleNode extends NodeV2 {
     NodeV2? k = this;
 
     while (k != null) {
-      if (k.tag == "a") {
+      if (k.tagName == "a") {
         List<SimpleProperty> hrefs =
             k.properties.where((element) => element.name == "href").toList();
 
@@ -417,7 +435,7 @@ class SimpleNode extends NodeV2 {
     NodeV2? k = this;
 
     while (k != null) {
-      if (tags.contains(k.tag)) return true;
+      if (tags.contains(k.tagName)) return true;
 
       k = k.parent;
     }
@@ -425,8 +443,10 @@ class SimpleNode extends NodeV2 {
     return false;
   }
 
-  SimpleNode(NodeV2 parent, this.startIndex, this.body)
-      : super._(parent, "", []);
+  SimpleNode(NodeV2 parent, int textIndexStart, this.body)
+      : super._(parent, "", "", []) {
+    _textIndexStart = textIndexStart;
+  }
 
   @override
   String toString() {

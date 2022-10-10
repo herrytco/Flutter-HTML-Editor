@@ -116,14 +116,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
         });
       });
 
-    // _controller.addListener(() {
-    // String reparsed = Parser().parse(_controller.text).toHtml();
-
-    // _controller.value = _controller.value.copyWith(
-    //   text: reparsed,
-    // );
-    // });
-
     _controller.addListener(() {
       setState(() {
         widget.onChanged(_controller.text);

@@ -116,9 +116,9 @@ class HtmlEditorController extends TextEditingController {
       NodeV2 affectedParent = affectedNode.parent!;
 
       // selection fully contains a node -> insert the attribute in its parent
-      if (op.start! <= affectedNode.startIndex &&
-          op.end! >= affectedNode.endIndex) {
-        if (affectedParent is SimpleNode || affectedParent.tag.isEmpty) {
+      if (op.start! <= affectedNode.textIndexStart &&
+          op.end! >= affectedNode.textIndexEnd) {
+        if (affectedParent is SimpleNode || affectedParent.tagName.isEmpty) {
           _insertTagNodeBetween(affectedParent, affectedNode,
               TagOperation('<span $op>', '</span>', 'span'));
         } else {
@@ -129,9 +129,9 @@ class HtmlEditorController extends TextEditingController {
       else {
         int opEnd = op.end!;
 
-        int startLocal = max(0, op.start! - affectedNode.startIndex);
-        int endLocal =
-            min(opEnd - affectedNode.startIndex, affectedNode.body.length - 1);
+        int startLocal = max(0, op.start! - affectedNode.textIndexStart);
+        int endLocal = min(
+            opEnd - affectedNode.textIndexStart, affectedNode.body.length - 1);
 
         List<String> bodyParts = [
           affectedNode.body.substring(0, startLocal),
@@ -139,7 +139,7 @@ class HtmlEditorController extends TextEditingController {
           affectedNode.body.substring(endLocal + 1),
         ];
 
-        int offsetChild = affectedNode.startIndex;
+        int offsetChild = affectedNode.textIndexStart;
         int startIndex = affectedParent.children.indexOf(affectedNode);
         affectedParent.children.remove(affectedNode);
 
@@ -152,11 +152,11 @@ class HtmlEditorController extends TextEditingController {
           affectedParent.addChild(childNew, startIndex++);
 
           // check if the new child is affected
-          if (op.start! <= childNew.startIndex &&
-              op.end! >= childNew.endIndex) {
+          if (op.start! <= childNew.textIndexStart &&
+              op.end! >= childNew.textIndexEnd) {
             // fully enclosed
-            if (op.start! <= childNew.startIndex &&
-                op.end! >= childNew.endIndex) {
+            if (op.start! <= childNew.textIndexStart &&
+                op.end! >= childNew.textIndexEnd) {
               _insertTagNodeBetween(affectedParent, childNew,
                   TagOperation('<span $op>', '</span>', 'span'));
             }
@@ -196,21 +196,25 @@ class HtmlEditorController extends TextEditingController {
     List<SimpleNode> affectedNodes =
         tree.getNodesInSelection(op.start!, op.end!);
 
+    List<SimpleNode> changedNodes = [];
+
     for (SimpleNode affectedNode in affectedNodes) {
       NodeV2 affectedParent = affectedNode.parent!;
 
       // selection fully contains a node -> insert the attribute in its parent
-      if (op.start! <= affectedNode.startIndex &&
-          op.end! >= affectedNode.endIndex) {
+      if (op.start! <= affectedNode.textIndexStart &&
+          op.end! >= affectedNode.textIndexEnd) {
         _insertTagNodeBetween(affectedParent, affectedNode, op);
+
+        changedNodes.add(affectedNode);
       }
       // selection is only partially in a node -> split it into at least 2
       else {
         int opEnd = op.end!;
 
-        int startLocal = max(0, op.start! - affectedNode.startIndex);
-        int endLocal =
-            min(opEnd - affectedNode.startIndex, affectedNode.body.length - 1);
+        int startLocal = max(0, op.start! - affectedNode.textIndexStart);
+        int endLocal = min(
+            opEnd - affectedNode.textIndexStart, affectedNode.body.length - 1);
 
         List<String> bodyParts = [
           affectedNode.body.substring(0, startLocal),
@@ -218,7 +222,7 @@ class HtmlEditorController extends TextEditingController {
           affectedNode.body.substring(endLocal + 1),
         ];
 
-        int offsetChild = affectedNode.startIndex;
+        int offsetChild = affectedNode.textIndexStart;
         int startIndex = affectedParent.children.indexOf(affectedNode);
         affectedParent.children.remove(affectedNode);
 
@@ -231,20 +235,37 @@ class HtmlEditorController extends TextEditingController {
           affectedParent.addChild(childNew, startIndex++);
 
           // check if the new child is affected
-          if (op.start! <= childNew.startIndex &&
-              op.end! >= childNew.endIndex) {
+          if (op.start! <= childNew.textIndexStart &&
+              op.end! >= childNew.textIndexEnd) {
             _insertTagNodeBetween(affectedParent, childNew, op);
           }
         }
       }
     }
 
-    text = tree.toHtml();
+    if (changedNodes.isNotEmpty) {
+      int iStart = changedNodes.map((e) => e.textIndexStart).reduce(min);
+      int iEnd = changedNodes.map((e) => e.textIndexEnd).reduce(max) + 1;
+
+      if (editorFocusNode != null) {
+        print("selection: $iStart-$iEnd");
+
+        editorFocusNode!.requestFocus();
+        value = value.copyWith(
+          text: tree.toHtml(),
+          selection: TextSelection(baseOffset: iStart, extentOffset: iEnd),
+        );
+      }
+    } else {
+      value = value.copyWith(
+        text: tree.toHtml(),
+      );
+    }
   }
 
   void _insertTagNodeBetween(NodeV2 parent, NodeV2 child, TagOperation op) {
     // ignore the operation if the parent already has the correct type
-    if (parent.tag == op.tagName) return;
+    if (parent.tagName == op.tagName) return;
 
     NodeV2 parentNew = NodeV2.fromTag(
       parent,
@@ -253,6 +274,10 @@ class HtmlEditorController extends TextEditingController {
 
     parent.children[parent.children.indexOf(child)] = parentNew;
     parentNew.children.add(child);
+
+    if (child is SimpleNode) {
+      child.textIndexStart = child.textIndexStart + parentNew.fullTag.length;
+    }
   }
 
   void _cache() {

@@ -12,6 +12,9 @@ class Tag {
   /// tagname (without '<', '/' or '>')
   final String name;
 
+  /// complete tag includin properties and brackets
+  final String rawTag;
+
   /// start, or end-tag
   final bool isStart;
 
@@ -25,7 +28,8 @@ class Tag {
   final int rawTagLength;
 
   /// creates a new tag-representation. and decodes the "style" tag if present
-  Tag(this.name, this.properties, this.isStart, this.rawTagLength) {
+  Tag(this.name, this.rawTag, this.properties, this.isStart,
+      this.rawTagLength) {
     if (properties.containsKey("style")) {
       String styleProp = this.properties["style"];
       List<String> properties = styleProp.split(";");
@@ -45,8 +49,14 @@ class Tag {
     return "Tag($name, $properties)";
   }
 
-  /// parses a tag-definition into a [Tag]
-  static Tag decodeTag(String tag) {
+  /// Decodes a random start- or end-tag encountered in HTML. [tag] is the full
+  /// tag including brackets, properties, etc.
+  ///
+  /// Valid inputs:
+  ///   - <p>
+  ///   - <p style="font-weight:bold;">
+  ///   - </p>
+  factory Tag.decodeTag(String tag) {
     String tagClean =
         tag.substring(1, tag.length - 1).replaceAll("\s+", " ").trim();
 
@@ -68,9 +78,9 @@ class Tag {
         properties[key] = value;
       }
 
-      return Tag(tagName, properties, true, tag.length);
+      return Tag(tagName, tag, properties, true, tag.length);
     } else if (RegExProvider.endTagRegex.hasMatch(tag)) {
-      return Tag(tag.substring(2, tag.length - 1), {}, false, tag.length);
+      return Tag(tag.substring(2, tag.length - 1), tag, {}, false, tag.length);
     }
 
     throw Exception("Tag $tag was not decodeable!");

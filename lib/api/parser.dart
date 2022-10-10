@@ -88,8 +88,8 @@ class Parser {
           state = _parseAndAddTo(nodeNew, state);
         } else {
           // encountered an end-tag
-          if (k.tag != tag.name) {
-            throw UnexpectedEndTagException(k.tag, tag.name);
+          if (k.tagName != tag.name) {
+            throw UnexpectedEndTagException(k.tagName, tag.name);
           }
 
           state.textOffset += tag.rawTagLength;
