@@ -1,3 +1,7 @@
+## 0.1.0
+
+* Added error handling. Now, errors can be displayed in the renderer to indicate invalid HTML.
+
 ## 0.0.21
 
 * Implemented a new parser to convert the raw HTML into a tree

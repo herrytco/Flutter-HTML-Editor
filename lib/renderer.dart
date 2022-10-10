@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/api/exceptions/parse_exceptions.dart';
 import 'package:light_html_editor/api/text_renderer.dart';
 import 'package:light_html_editor/data/renderer_decoration.dart';
 import 'package:light_html_editor/editor.dart';
@@ -23,6 +24,7 @@ class RichtextRenderer extends StatelessWidget {
     this.placeholders = const [],
     this.rendererDecoration = const RendererDecoration(),
     this.ignoreLinebreaks = false,
+    this.displayErrors = true,
   }) : super(key: key) {
     if (maxLines != null && maxLength != null)
       throw Exception("maxLines == null || maxLength == null must be true");
@@ -33,6 +35,9 @@ class RichtextRenderer extends StatelessWidget {
 
   /// optional maximum number of lines to be displayed.
   final int? maxLines;
+
+  /// control whether errors should be shown or not
+  final bool displayErrors;
 
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
@@ -65,6 +70,38 @@ class RichtextRenderer extends StatelessWidget {
     );
   }
 
+  Widget get content {
+    String? error;
+    RichText? parsedHtml;
+
+    try {
+      parsedHtml = TextRenderer(
+        rawHtml!,
+        rendererDecoration,
+        maxLength,
+        maxLines,
+        placeholders,
+        placeholderMarker,
+        ignoreLinebreaks,
+      ).paragraphs;
+    } on UnexpectedEndTagException catch (e) {
+      error = "$e";
+    }
+
+    if (displayErrors && error != null) {
+      return Text(
+        error,
+        style: rendererDecoration.errorStyle,
+      );
+    }
+
+    if (rawHtml != null && rawHtml!.isEmpty) return SizedBox();
+
+    if (parsedHtml != null) return parsedHtml;
+
+    return SizedBox();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -86,17 +123,7 @@ class RichtextRenderer extends StatelessWidget {
                   ? rendererDecoration.maxHeight!
                   : double.infinity,
             ),
-            child: rawHtml != null && rawHtml!.isEmpty
-                ? SizedBox()
-                : TextRenderer(
-                    rawHtml!,
-                    rendererDecoration,
-                    maxLength,
-                    maxLines,
-                    placeholders,
-                    placeholderMarker,
-                    ignoreLinebreaks,
-                  ).paragraphs,
+            child: content,
           ),
         ],
       ),

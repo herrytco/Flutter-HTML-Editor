@@ -78,13 +78,8 @@ class TextRenderer {
   ) {
     _initFontStyles();
 
-    try {
-      NodeV2 root = Parser().parse(rawHtml);
-      _proccessNode(root);
-    } catch (e) {
-      // TODO add proper error handling
-      // do nothing for now
-    }
+    NodeV2 root = Parser().parse(rawHtml);
+    _proccessNode(root);
 
     int textLength = 0;
     bool full = false;

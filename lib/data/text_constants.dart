@@ -18,6 +18,12 @@ class TextConstants {
   /// available header tags
   static const List<String> headers = const ["h1", "h2", "h3"];
 
+  /// used when invalid HTML is parsed
+  static const TextStyle errorStyle = TextStyle(
+    color: Colors.red,
+    fontWeight: FontWeight.bold,
+  );
+
   /// corresponding header-sizes
   static const Map<String, double> headerSizes = const {
     "h1": 30,

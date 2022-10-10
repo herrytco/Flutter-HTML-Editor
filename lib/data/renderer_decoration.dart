@@ -22,6 +22,8 @@ class RendererDecoration {
 
   final List<RendererTextProperties> textProperties;
 
+  final TextStyle errorStyle;
+
   const RendererDecoration({
     this.border,
     this.borderRadius,
@@ -35,5 +37,6 @@ class RendererDecoration {
     this.linkUnderline,
     this.overflowIndicator = "...",
     this.textProperties = const [],
+    this.errorStyle = TextConstants.errorStyle,
   });
 }

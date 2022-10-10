@@ -1,3 +1,4 @@
+import 'package:light_html_editor/api/exceptions/parse_exceptions.dart';
 import 'package:light_html_editor/api/regex_provider.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/api/v2/node_v2.dart';
@@ -88,8 +89,7 @@ class Parser {
         } else {
           // encountered an end-tag
           if (k.tag != tag.name) {
-            throw Exception(
-                "Unexpected end-tag! Expected '</${k.tag}>' but found '</${tag.name}>'");
+            throw UnexpectedEndTagException(k.tag, tag.name);
           }
 
           state.textOffset += tag.rawTagLength;
