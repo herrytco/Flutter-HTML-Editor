@@ -1,6 +1,7 @@
 ## 0.1.0
 
 * Added error handling. Now, errors can be displayed in the renderer to indicate invalid HTML.
+* Fixed linebreaks
 
 ## 0.0.21
 

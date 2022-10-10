@@ -333,6 +333,22 @@ class SimpleNode extends NodeV2 {
     return sizes[""]!;
   }
 
+  /// returns true iff this node is the first child of the parent or of the
+  /// parent is null
+  bool get isFirstChild {
+    if (parent == null) return true;
+
+    return parent!.children.first == this;
+  }
+
+  /// returns true iff this node is the last child of the parent or of the
+  /// parent is null
+  bool get isLastChild {
+    if (parent == null) return true;
+
+    return parent!.children.last == this;
+  }
+
   /// Searches the path to the root for the first occurance of a node with a
   /// color information. Returns [null] if no information is present
   Color? get textColor {

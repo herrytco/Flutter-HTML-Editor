@@ -209,8 +209,10 @@ class TextRenderer {
   ///
   void _proccessNode(NodeV2 node) {
     if (node is SimpleNode) {
-      bool addLineBreakBefore = node.isHeader || node.isParagraph;
-      bool addLineBreakAfter = node.isHeader || node.isParagraph;
+      bool addLineBreakBefore =
+          (node.isHeader || node.isParagraph) && node.isFirstChild;
+      bool addLineBreakAfter =
+          (node.isHeader || node.isParagraph) && node.isLastChild;
 
       _flattenedNodes.add(
         _TextNode(

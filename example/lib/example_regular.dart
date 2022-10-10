@@ -35,7 +35,9 @@ class _RegularExampleState extends State<RegularExample> {
             },
             alwaysShowButtons: true,
             initialValue:
-                'Read more at <a href="https://www.google.at">Google</a>',
+                '<h2>Reload (<span style="color:#579F5A;">2</span>)</h2>',
+            // initialValue:
+            //     'Read more at <a href="https://www.google.at">Google</a>',
           ),
         ),
       ),
