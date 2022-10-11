@@ -35,7 +35,8 @@ class _RegularExampleState extends State<RegularExample> {
               // do something with the richtext
             },
             alwaysShowButtons: true,
-            initialValue: 'level0<b>level 1</b><b>level 1 too</b>',
+            initialValue:
+                'Read more at <a href="https://www.google.at">Google</a>',
           ),
         ),
       ),

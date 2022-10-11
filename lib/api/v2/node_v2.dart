@@ -209,6 +209,33 @@ class NodeV2 {
     return null;
   }
 
+  List<SimpleNode> getLeaves() {
+    List<SimpleNode> result = [];
+
+    List<NodeV2> toCheck = [this];
+
+    while (toCheck.isNotEmpty) {
+      NodeV2 k = toCheck[0];
+      toCheck.remove(k);
+
+      if (k is SimpleNode) {
+        result.add(k);
+      } else {
+        toCheck.addAll(k.children);
+      }
+    }
+
+    return result;
+  }
+
+  NodeV2 get root {
+    NodeV2 k = this;
+
+    while (k.parent != null) k = k.parent!;
+
+    return k;
+  }
+
   ///
   /// find all nodes that have their [textIndexStart] >= [start] and [startIndex+body.length] <= [end]
   ///
@@ -222,7 +249,7 @@ class NodeV2 {
       toCheck.remove(k);
 
       if (k is SimpleNode) {
-        // full selection
+        // full or partial selection
         if ((k.textIndexStart <= start && start <= k.textIndexEnd) ||
             (k.textIndexStart <= end && end <= k.textIndexEnd) ||
             (start <= k.textIndexStart && k.textIndexEnd <= end)) result.add(k);
@@ -238,6 +265,15 @@ class NodeV2 {
 /// Represents a leaf-node in the DOM. This node only contains text and is used
 /// to separate styling logic from the actual textual information
 class SimpleNode extends NodeV2 {
+  static int _nextId = 1;
+
+  /// id to find the node later again
+  int id = _nextId++;
+
+  void refreshId() {
+    id = _nextId++;
+  }
+
   /// Text contained in the node. Unstructured plaintext containing no HTML
   final String body;
 
@@ -454,7 +490,7 @@ class SimpleNode extends NodeV2 {
 
   @override
   String toString() {
-    return "<>$body</>";
+    return "<id=$id>$body</>";
   }
 }
 
@@ -480,11 +516,15 @@ class StyleProperty extends SimpleProperty {
       : super("style", styleProperties);
 
   /// adds a new property to the attribute, overwrites the value set if it
-  /// already exists
-  void putProperty(String key, String sValue) {
+  /// already exists. Retuns true, if a new property was added.
+  bool putProperty(String key, String sValue) {
     Map<String, dynamic> p = value;
 
+    bool wasAdded = !p.containsKey(key);
+
     p[key] = sValue;
+
+    return wasAdded;
   }
 
   /// Searches for a specific property. Returns null if it does not exist.
