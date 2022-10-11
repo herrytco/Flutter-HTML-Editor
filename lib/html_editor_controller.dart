@@ -188,23 +188,53 @@ class HtmlEditorController extends TextEditingController {
   ///
   void wrapWithStartAndEnd(TagOperation op) {
     _cache();
-
     op.setSelection(selection);
 
     NodeV2 tree = Parser().parse(text);
 
+    int opStart = op.start!;
+    int opEnd = op.end!;
+
+    // pass 1: split only partly affected nodes into new simple nodes
     List<SimpleNode> affectedNodes =
         tree.getNodesInSelection(op.start!, op.end!);
 
+    for (SimpleNode affectedNode in affectedNodes) {
+      if (affectedNode.isFullySelected(opStart, opEnd)) continue;
+
+      NodeV2 affectedParent = affectedNode.parent!;
+
+      int startLocal = max(0, op.start! - affectedNode.textIndexStart);
+      int endLocal = min(
+          opEnd - affectedNode.textIndexStart, affectedNode.body.length - 1);
+
+      List<String> bodyParts = [
+        affectedNode.body.substring(0, startLocal),
+        affectedNode.body.substring(startLocal, endLocal + 1),
+        affectedNode.body.substring(endLocal + 1),
+      ].where((element) => element.isNotEmpty).toList();
+
+      int offsetChild = affectedNode.textIndexStart;
+      int startIndex = affectedParent.children.indexOf(affectedNode);
+      affectedParent.children.remove(affectedNode);
+
+      for (String part in bodyParts) {
+        var childNew = SimpleNode(affectedParent, offsetChild, part);
+        offsetChild += part.length;
+
+        affectedParent.addChild(childNew, startIndex++);
+      }
+    }
+
+    // pass 2: apply new tag to all (now only full-selection) nodes
+    affectedNodes = tree.getNodesInSelection(op.start!, op.end!);
     List<SimpleNode> changedNodes = [];
-    int opEnd = op.end!;
 
     for (SimpleNode affectedNode in affectedNodes) {
       NodeV2 affectedParent = affectedNode.parent!;
 
       // selection fully contains a node -> insert the attribute in its parent
-      if (op.start! <= affectedNode.textIndexStart &&
-          opEnd >= affectedNode.textIndexEnd) {
+      if (affectedNode.isFullySelected(opStart, opEnd)) {
         int offset = _insertTagNodeBetween(affectedParent, affectedNode, op);
 
         // apply the offset to all nodes and the selection end
@@ -213,37 +243,6 @@ class HtmlEditorController extends TextEditingController {
 
         changedNodes.add(affectedNode);
       }
-      // selection is only partially in a node -> split it into at least 2
-      else {
-        int startLocal = max(0, op.start! - affectedNode.textIndexStart);
-        int endLocal = min(
-            opEnd - affectedNode.textIndexStart, affectedNode.body.length - 1);
-
-        List<String> bodyParts = [
-          affectedNode.body.substring(0, startLocal),
-          affectedNode.body.substring(startLocal, endLocal + 1),
-          affectedNode.body.substring(endLocal + 1),
-        ].where((element) => element.isNotEmpty).toList();
-
-        // TODO continue here :)
-
-        int offsetChild = affectedNode.textIndexStart;
-        int startIndex = affectedParent.children.indexOf(affectedNode);
-        affectedParent.children.remove(affectedNode);
-
-        for (String part in bodyParts) {
-          var childNew = SimpleNode(affectedParent, offsetChild, part);
-          offsetChild += part.length;
-
-          affectedParent.addChild(childNew, startIndex++);
-
-          // check if the new child is affected
-          if (op.start! <= childNew.textIndexStart &&
-              opEnd >= childNew.textIndexEnd) {
-            _insertTagNodeBetween(affectedParent, childNew, op);
-          }
-        }
-      }
     }
 
     if (changedNodes.isNotEmpty) {
@@ -251,8 +250,6 @@ class HtmlEditorController extends TextEditingController {
       int iEnd = changedNodes.map((e) => e.textIndexEnd).reduce(max) + 1;
 
       if (editorFocusNode != null) {
-        print("selection: $iStart-$iEnd");
-
         editorFocusNode!.requestFocus();
         value = value.copyWith(
           text: tree.toHtml(),
@@ -266,6 +263,8 @@ class HtmlEditorController extends TextEditingController {
     }
   }
 
+  /// selects all nodes in [affectedNodes] that have a higher index than [source]
+  /// and raises their [textIndexStart] by [offset].
   void _applyOffsetToNodes(
       List<SimpleNode> affectedNodes, int offset, SimpleNode source) {
     int sourceIndex = affectedNodes.indexOf(source);
@@ -277,14 +276,12 @@ class HtmlEditorController extends TextEditingController {
     });
   }
 
-  ///
   /// inserts a new node into the graph between [parent] and [child]. The new
   /// node is only inserted, if the parent is not already of the type of the
   /// new node. The return value is the string offset that needs to be applied
   /// to all nodes right of [child]. It is the number of characters contained
   /// in the newly added start- and end-tag. [child] itself is offset by only
   /// the width of the start-tag.
-  ///
   int _insertTagNodeBetween(NodeV2 parent, SimpleNode child, TagOperation op) {
     // ignore the operation if the parent already has the correct type
     if (parent.tagName == op.tagName) return 0;

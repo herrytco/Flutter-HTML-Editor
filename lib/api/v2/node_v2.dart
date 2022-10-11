@@ -32,6 +32,10 @@ class NodeV2 {
 
   int get textIndexStart => _textIndexStart;
 
+  bool isFullySelected(int selectionStart, int selectionEnd) {
+    return selectionStart <= textIndexStart && selectionEnd >= textIndexEnd;
+  }
+
   set textIndexStart(int value) {
     _textIndexStart = value;
 
