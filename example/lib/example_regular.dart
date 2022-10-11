@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:light_html_editor/api/v2/printer.dart';
 import 'package:light_html_editor/html_editor_controller.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -35,9 +36,7 @@ class _RegularExampleState extends State<RegularExample> {
             },
             alwaysShowButtons: true,
             initialValue:
-                '<h2>Reload (<span style="color:#579F5A;">2</span>)</h2>',
-            // initialValue:
-            //     'Read more at <a href="https://www.google.at">Google</a>',
+                'Read more at <a href="https://www.google.at">Google</a>',
           ),
         ),
       ),

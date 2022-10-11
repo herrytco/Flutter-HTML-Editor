@@ -6,8 +6,10 @@ class PrinterV2 {
   }
 
   static String printTreeAtLevel(NodeV2 tree, int level) {
-    String result =
-        "${getSpaced(level)} ${tree.prettyTag} (${tree.startIndex}, ${tree.endIndex}): ";
+    String result = "${getSpaced(level)} ${tree.prettyTag}";
+
+    result +=
+        "(${tree.nodeIndexStart}/${tree.textIndexStart} - ${tree.textIndexEnd}/${tree.nodeIndexEnd}): ";
 
     if (tree is SimpleNode) {
       result += " ${tree.body}";
