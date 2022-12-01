@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
@@ -389,6 +390,23 @@ class SimpleNode extends NodeV2 {
     }
 
     return sizes[""]!;
+  }
+
+  /// Gathers all <sub> and <sup> nodes and adds the corresponding [FontFeature]
+  /// to the result set
+  Set<FontFeature> get fontFeatures {
+    NodeV2? k = parent;
+
+    Set<FontFeature> result = {};
+
+    while (k != null) {
+      if (k.tagName == "sup") result.add(FontFeature.superscripts());
+      if (k.tagName == "sub") result.add(FontFeature.subscripts());
+
+      k = k.parent;
+    }
+
+    return result;
   }
 
   /// returns true iff this node is the first child of the parent or of the

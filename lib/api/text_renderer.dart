@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -150,6 +151,7 @@ class TextRenderer {
 
     if (!_fontSizes.containsKey("")) {
       _fontSizes[""] = TextConstants.defaultFontSize;
+      _fontSizes["sub"] = TextConstants.defaultFontSize / 2;
     }
 
     if (!_fontFamilies.containsKey("")) {
@@ -224,6 +226,9 @@ class TextRenderer {
             fontStyle: node.fontStyle,
             color: _color(node),
             decoration: _textDecoration(node),
+            fontFeatures: [
+              FontFeature.superscripts(),
+            ],
           ),
           addLineBreakBefore,
           addLineBreakAfter,
