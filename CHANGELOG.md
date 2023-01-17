@@ -1,4 +1,4 @@
-## 0.1.1
+## 0.1.2
 
 * added a fake `<sub>` tag that makes the font 1/2 of the default font, will be replaced by the actual subscript feature in the future
 

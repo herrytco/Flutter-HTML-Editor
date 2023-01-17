@@ -226,9 +226,6 @@ class TextRenderer {
             fontStyle: node.fontStyle,
             color: _color(node),
             decoration: _textDecoration(node),
-            fontFeatures: [
-              FontFeature.superscripts(),
-            ],
           ),
           addLineBreakBefore,
           addLineBreakAfter,
