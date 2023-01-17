@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:light_html_editor/api/v2/printer.dart';
 import 'package:light_html_editor/html_editor_controller.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:flutter_html/flutter_html.dart';

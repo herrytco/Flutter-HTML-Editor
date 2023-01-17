@@ -57,9 +57,12 @@ class ButtonRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 4, right: 4, top: 4),
+      padding: const EdgeInsets.all(4),
       width: double.infinity,
+      // color: decoration.backgroundColor,
       child: Wrap(
+        spacing: 1,
+        runSpacing: 1,
         children: [
           FontCustomButton(
             onClick: _onBold,
