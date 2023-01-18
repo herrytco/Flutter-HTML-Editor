@@ -3,6 +3,7 @@ import 'package:light_html_editor/api/operations/property_operation.dart';
 import 'package:light_html_editor/api/operations/tag_operation.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 import 'package:light_html_editor/html_editor_controller.dart';
+import 'package:light_html_editor/ui/buttons/background_color_button.dart';
 import 'package:light_html_editor/ui/buttons/color_button.dart';
 import 'package:light_html_editor/ui/buttons/custom_button.dart';
 import 'package:light_html_editor/ui/buttons/icon_button.dart';
@@ -15,12 +16,16 @@ class ButtonRow extends StatelessWidget {
     Key? key,
     required this.showHeaderButtons,
     required this.decoration,
+    required this.showBackgroundColorButtons,
+    required this.showColorButtons,
   }) : super(key: key);
 
   final List<String> availableColors;
   final List<Widget> additionalButtons;
   final HtmlEditorController controller;
   final bool showHeaderButtons;
+  final bool showColorButtons;
+  final bool showBackgroundColorButtons;
   final EditorDecoration decoration;
 
   /// wraps the current selection with <b></b>
@@ -47,7 +52,10 @@ class ButtonRow extends StatelessWidget {
   /// wraps the current selection with <span style="color:[hex]"></span>
   void _onColor(String hex) =>
       controller.insertStyleProperty(StylePropertyOperation("color", hex));
-  // controller.wrapWithStartAndEnd(TagOperation('<span style="color:$hex;">', '</span>'));
+
+  /// wraps the current selection with <span style="background-color:[hex]"></span>
+  void _onBackgroundColor(String hex) => controller
+      .insertStyleProperty(StylePropertyOperation("background-color", hex));
 
   void _onLink() =>
       controller.wrapWithStartAndEnd(TagOperation('<a href="">', '</a>', 'a'));
@@ -144,11 +152,18 @@ class ButtonRow extends StatelessWidget {
             onClick: _onLink,
             color: decoration.buttonColor,
           ),
-          for (String color in availableColors)
-            FontColorButton.fromColor(
-              color,
-              () => _onColor(color),
-            ),
+          if (showColorButtons)
+            for (String color in availableColors)
+              FontColorButton.fromColor(
+                color,
+                () => _onColor(color),
+              ),
+          if (showBackgroundColorButtons)
+            for (String color in availableColors)
+              FontBackgroundColorButton.fromColor(
+                color,
+                () => _onBackgroundColor(color),
+              ),
           if (controller.canUndo)
             FontIconButton(
               Icons.undo,

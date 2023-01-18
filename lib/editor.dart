@@ -60,12 +60,16 @@ class RichTextEditor extends StatefulWidget {
     this.additionalActionButtons,
     this.animatePreviewToEditorPosition = true,
     this.autofocus = false,
+    this.showColorButtons = true,
+    this.showBackgroundColorButtons = true,
     this.previewDecoration = const RendererDecoration(),
   }) : super(key: key);
   final TextStyle? labelTextStyle;
   final bool autofocus;
   final bool showPreview;
   final bool showHeaderButton;
+  final bool showColorButtons;
+  final bool showBackgroundColorButtons;
   final String? initialValue;
   final int? maxLength;
   final String placeholderMarker;
@@ -186,6 +190,8 @@ class _RichTextEditorState extends State<RichTextEditor> {
               widget.additionalActionButtons ?? [],
               showHeaderButtons: widget.showHeaderButton,
               decoration: widget.editorDecoration,
+              showBackgroundColorButtons: widget.showBackgroundColorButtons,
+              showColorButtons: widget.showColorButtons,
             ),
             SizedBox(height: widget.editorDecoration.buttonEditorSpacing),
           ],
@@ -205,7 +211,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
                         Container(
                           height: constraints.maxHeight - 27,
                           padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
                             horizontal: 8.0,
                           ),
                           decoration: BoxDecoration(
@@ -241,7 +246,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
                               controller: _previewScrollController,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
                                   horizontal: 8.0,
                                 ),
                                 decoration: BoxDecoration(

@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
 import 'package:light_html_editor/api/richtext_node.dart';
 import 'package:light_html_editor/data/color_utils.dart';
 import 'package:light_html_editor/data/text_constants.dart';
@@ -423,6 +422,30 @@ class SimpleNode extends NodeV2 {
     if (parent == null) return true;
 
     return parent!.children.last == this;
+  }
+
+  Color? get backgroundColor {
+    NodeV2? k = this;
+
+    while (k != null) {
+      if (k.styleProperty != null) {
+        StyleProperty prop = k.styleProperty!;
+
+        dynamic color = prop.getProperty("background-color");
+
+        if (color != null) {
+          try {
+            return ColorUtils.colorForHex(color);
+          } catch (e) {
+            return TextConstants.defaultColor;
+          }
+        }
+      }
+
+      k = k.parent;
+    }
+
+    return null;
   }
 
   /// Searches the path to the root for the first occurance of a node with a
