@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
 
 ///
@@ -87,7 +88,9 @@ class _SelectableTextfieldState extends State<SelectableTextfield> {
         contentPadding: EdgeInsets.symmetric(vertical: 14.0),
       ),
       cursorColor: widget.editorDecoration.cursorColor,
-      style: widget.editorDecoration.inputStyle,
+      style: GoogleFonts.getFont('Ubuntu Mono').copyWith(
+        color: widget.editorDecoration.inputStyle.color,
+      ),
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:light_html_editor/api/v2/printer.dart';
 import 'package:light_html_editor/html_editor_controller.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:flutter_html/flutter_html.dart';
@@ -23,7 +22,7 @@ class _RegularExampleState extends State<RegularExample> {
       backgroundColor: Colors.grey,
       body: Center(
         child: SizedBox(
-          width: 400,
+          width: 800,
           child: RichTextEditor(
             placeholders: [
               RichTextPlaceholder(
@@ -34,6 +33,11 @@ class _RegularExampleState extends State<RegularExample> {
             onChanged: (String html) {
               // do something with the richtext
             },
+            editorDecoration: EditorDecoration(
+              inputStyle: TextStyle(
+                color: Colors.blue,
+              ),
+            ),
             alwaysShowButtons: true,
             initialValue:
                 'Read more at <a href="https://www.google.at">Google</a>',

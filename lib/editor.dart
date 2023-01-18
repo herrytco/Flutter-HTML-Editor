@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:light_html_editor/button_row.dart';
+import 'package:light_html_editor/ui/button_row.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:light_html_editor/ui/selectable_textfield.dart';
@@ -60,12 +60,16 @@ class RichTextEditor extends StatefulWidget {
     this.additionalActionButtons,
     this.animatePreviewToEditorPosition = true,
     this.autofocus = false,
+    this.showColorButtons = true,
+    this.showBackgroundColorButtons = true,
     this.previewDecoration = const RendererDecoration(),
   }) : super(key: key);
   final TextStyle? labelTextStyle;
   final bool autofocus;
   final bool showPreview;
   final bool showHeaderButton;
+  final bool showColorButtons;
+  final bool showBackgroundColorButtons;
   final String? initialValue;
   final int? maxLength;
   final String placeholderMarker;
@@ -186,10 +190,10 @@ class _RichTextEditorState extends State<RichTextEditor> {
               widget.additionalActionButtons ?? [],
               showHeaderButtons: widget.showHeaderButton,
               decoration: widget.editorDecoration,
+              showBackgroundColorButtons: widget.showBackgroundColorButtons,
+              showColorButtons: widget.showColorButtons,
             ),
-            SizedBox(
-              height: 8.0,
-            ),
+            SizedBox(height: widget.editorDecoration.buttonEditorSpacing),
           ],
           Expanded(
             child: Row(
@@ -204,11 +208,9 @@ class _RichTextEditorState extends State<RichTextEditor> {
                           widget.editorDecoration.editorLabel ?? "Raw",
                           style: widget.labelTextStyle,
                         ),
-                        const SizedBox(height: 8.0),
                         Container(
                           height: constraints.maxHeight - 27,
                           padding: const EdgeInsets.symmetric(
-                            vertical: 8.0,
                             horizontal: 8.0,
                           ),
                           decoration: BoxDecoration(
@@ -228,31 +230,27 @@ class _RichTextEditorState extends State<RichTextEditor> {
                   ),
                 ),
                 if (widget.showPreview) ...[
-                  const SizedBox(width: 8.0),
+                  SizedBox(width: widget.editorDecoration.editorPreviewSpacing),
                   Expanded(
                     child: Container(
-                      padding: widget.previewDecoration.padding,
                       height: double.infinity,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
                             "Preview",
                             style: widget.labelTextStyle,
                           ),
-                          const SizedBox(height: 8.0),
                           Expanded(
                             child: SingleChildScrollView(
                               controller: _previewScrollController,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
                                   horizontal: 8.0,
                                 ),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(4.0),
-                                  border: Border.all(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                                  border: widget.previewDecoration.border,
                                 ),
                                 child: RichtextRenderer.fromRichtext(
                                   _controller.text,

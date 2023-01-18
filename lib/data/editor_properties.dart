@@ -14,6 +14,9 @@ class EditorDecoration {
 
   final Color buttonColor;
 
+  final double buttonEditorSpacing;
+  final double editorPreviewSpacing;
+
   const EditorDecoration({
     this.border,
     this.borderRadius,
@@ -24,6 +27,8 @@ class EditorDecoration {
     this.labelStyle = TextConstants.labelStyle,
     this.focusedLabelStyle = TextConstants.labelStyle,
     this.buttonColor = TextConstants.defaultColor,
+    this.buttonEditorSpacing = 4,
+    this.editorPreviewSpacing = 8,
     this.maxLines,
   });
 }

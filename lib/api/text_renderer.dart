@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -226,6 +225,7 @@ class TextRenderer {
             fontStyle: node.fontStyle,
             color: _color(node),
             decoration: _textDecoration(node),
+            backgroundColor: node.backgroundColor,
           ),
           addLineBreakBefore,
           addLineBreakAfter,
