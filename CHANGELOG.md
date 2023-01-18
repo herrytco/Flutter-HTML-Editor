@@ -1,3 +1,8 @@
+## 0.2.0
+
+* added the style-property `background-color`, that controls the `backgroundColor` attribute of the `Text` displayed
+* changed the styling of the widget a bit, removed odd spacings
+
 ## 0.1.2
 
 * added a fake `<sub>` tag that makes the font 1/2 of the default font, will be replaced by the actual subscript feature in the future
