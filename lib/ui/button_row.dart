@@ -22,7 +22,7 @@ class ButtonRow extends StatelessWidget {
     this.availableColors,
     this.additionalButtons, {
     Key? key,
-    this.availableButtons = const [],
+    this.availableButtons = ButtonRowType.values,
     required this.showHeaderButtons,
     required this.decoration,
     required this.showBackgroundColorButtons,
