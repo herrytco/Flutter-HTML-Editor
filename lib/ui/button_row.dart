@@ -8,12 +8,21 @@ import 'package:light_html_editor/ui/buttons/color_button.dart';
 import 'package:light_html_editor/ui/buttons/custom_button.dart';
 import 'package:light_html_editor/ui/buttons/icon_button.dart';
 
+enum ButtonRowType {
+  bold,
+  italics,
+  underline,
+  paragraph,
+  link,
+}
+
 class ButtonRow extends StatelessWidget {
   const ButtonRow(
     this.controller,
     this.availableColors,
     this.additionalButtons, {
     Key? key,
+    this.availableButtons = ButtonRowType.values,
     required this.showHeaderButtons,
     required this.decoration,
     required this.showBackgroundColorButtons,
@@ -27,6 +36,7 @@ class ButtonRow extends StatelessWidget {
   final bool showColorButtons;
   final bool showBackgroundColorButtons;
   final EditorDecoration decoration;
+  final List<ButtonRowType> availableButtons;
 
   /// wraps the current selection with <b></b>
   void _onBold() => controller.wrapWithTag("b");
@@ -72,49 +82,53 @@ class ButtonRow extends StatelessWidget {
         spacing: 1,
         runSpacing: 1,
         children: [
-          FontCustomButton(
-            onClick: _onBold,
-            icon: Text(
-              "B",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: decoration.buttonColor,
+          if (availableButtons.contains(ButtonRowType.bold))
+            FontCustomButton(
+              onClick: _onBold,
+              icon: Text(
+                "B",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: decoration.buttonColor,
+                ),
               ),
             ),
-          ),
-          FontCustomButton(
-            onClick: _onItalics,
-            icon: Text(
-              "I",
-              style: TextStyle(
-                fontSize: 20,
-                fontStyle: FontStyle.italic,
-                color: decoration.buttonColor,
+          if (availableButtons.contains(ButtonRowType.italics))
+            FontCustomButton(
+              onClick: _onItalics,
+              icon: Text(
+                "I",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontStyle: FontStyle.italic,
+                  color: decoration.buttonColor,
+                ),
               ),
             ),
-          ),
-          FontCustomButton(
-            onClick: _onUnderline,
-            icon: Text(
-              "U",
-              style: TextStyle(
-                fontSize: 20,
-                decoration: TextDecoration.underline,
-                color: decoration.buttonColor,
+          if (availableButtons.contains(ButtonRowType.underline))
+            FontCustomButton(
+              onClick: _onUnderline,
+              icon: Text(
+                "U",
+                style: TextStyle(
+                  fontSize: 20,
+                  decoration: TextDecoration.underline,
+                  color: decoration.buttonColor,
+                ),
               ),
             ),
-          ),
-          FontCustomButton(
-            onClick: _onParagraph,
-            icon: Text(
-              "P",
-              style: TextStyle(
-                fontSize: 20,
-                color: decoration.buttonColor,
+          if (availableButtons.contains(ButtonRowType.paragraph))
+            FontCustomButton(
+              onClick: _onParagraph,
+              icon: Text(
+                "P",
+                style: TextStyle(
+                  fontSize: 20,
+                  color: decoration.buttonColor,
+                ),
               ),
             ),
-          ),
           if (showHeaderButtons) ...[
             FontCustomButton(
               onClick: _onH1,
@@ -147,11 +161,12 @@ class ButtonRow extends StatelessWidget {
               ),
             ),
           ],
-          FontIconButton(
-            Icons.link,
-            onClick: _onLink,
-            color: decoration.buttonColor,
-          ),
+          if (availableButtons.contains(ButtonRowType.link))
+            FontIconButton(
+              Icons.link,
+              onClick: _onLink,
+              color: decoration.buttonColor,
+            ),
           if (showColorButtons)
             for (String color in availableColors)
               FontColorButton.fromColor(

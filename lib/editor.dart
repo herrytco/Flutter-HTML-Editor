@@ -63,6 +63,7 @@ class RichTextEditor extends StatefulWidget {
     this.showColorButtons = true,
     this.showBackgroundColorButtons = true,
     this.previewDecoration = const RendererDecoration(),
+    this.availableButtons = ButtonRowType.values,
   }) : super(key: key);
   final TextStyle? labelTextStyle;
   final bool autofocus;
@@ -78,6 +79,7 @@ class RichTextEditor extends StatefulWidget {
   final bool alwaysShowButtons;
   final bool animatePreviewToEditorPosition;
   final List<Widget>? additionalActionButtons;
+  final List<ButtonRowType> availableButtons;
 
   final EditorDecoration editorDecoration;
   final HtmlEditorController? controller;
@@ -192,6 +194,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
               decoration: widget.editorDecoration,
               showBackgroundColorButtons: widget.showBackgroundColorButtons,
               showColorButtons: widget.showColorButtons,
+              availableButtons: widget.availableButtons,
             ),
             SizedBox(height: widget.editorDecoration.buttonEditorSpacing),
           ],
