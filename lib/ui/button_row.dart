@@ -8,14 +8,23 @@ import 'package:light_html_editor/ui/buttons/color_button.dart';
 import 'package:light_html_editor/ui/buttons/custom_button.dart';
 import 'package:light_html_editor/ui/buttons/icon_button.dart';
 
+///
+/// one entry per displayable button-type in editor
+///
 enum ButtonRowType {
   bold,
   italics,
   underline,
   paragraph,
   link,
+  headers,
+  colors,
+  backgroundColors,
 }
 
+///
+/// A row of buttons controlling text-operations available in the editor
+/// 
 class ButtonRow extends StatelessWidget {
   const ButtonRow(
     this.controller,
@@ -23,18 +32,12 @@ class ButtonRow extends StatelessWidget {
     this.additionalButtons, {
     Key? key,
     this.availableButtons = ButtonRowType.values,
-    required this.showHeaderButtons,
     required this.decoration,
-    required this.showBackgroundColorButtons,
-    required this.showColorButtons,
   }) : super(key: key);
 
   final List<String> availableColors;
   final List<Widget> additionalButtons;
   final HtmlEditorController controller;
-  final bool showHeaderButtons;
-  final bool showColorButtons;
-  final bool showBackgroundColorButtons;
   final EditorDecoration decoration;
   final List<ButtonRowType> availableButtons;
 
@@ -60,12 +63,17 @@ class ButtonRow extends StatelessWidget {
   void _onH3() => controller.wrapWithTag("h3");
 
   /// wraps the current selection with <span style="color:[hex]"></span>
-  void _onColor(String hex) =>
-      controller.insertStyleProperty(StylePropertyOperation("color", hex));
+  void _onColor(String hex) {
+    hex = hex.startsWith("#") ? hex : "#" + hex;
+    controller.insertStyleProperty(StylePropertyOperation("color", hex));
+  }
 
   /// wraps the current selection with <span style="background-color:[hex]"></span>
-  void _onBackgroundColor(String hex) => controller
-      .insertStyleProperty(StylePropertyOperation("background-color", hex));
+  void _onBackgroundColor(String hex) {
+    hex = hex.startsWith("#") ? hex : "#" + hex;
+    controller
+        .insertStyleProperty(StylePropertyOperation("background-color", hex));
+  }
 
   void _onLink() =>
       controller.wrapWithStartAndEnd(TagOperation('<a href="">', '</a>', 'a'));
@@ -129,7 +137,7 @@ class ButtonRow extends StatelessWidget {
                 ),
               ),
             ),
-          if (showHeaderButtons) ...[
+          if (availableButtons.contains(ButtonRowType.headers)) ...[
             FontCustomButton(
               onClick: _onH1,
               icon: Text(
@@ -167,13 +175,13 @@ class ButtonRow extends StatelessWidget {
               onClick: _onLink,
               color: decoration.buttonColor,
             ),
-          if (showColorButtons)
+          if (availableButtons.contains(ButtonRowType.colors))
             for (String color in availableColors)
               FontColorButton.fromColor(
                 color,
                 () => _onColor(color),
               ),
-          if (showBackgroundColorButtons)
+          if (availableButtons.contains(ButtonRowType.backgroundColors))
             for (String color in availableColors)
               FontBackgroundColorButton.fromColor(
                 color,

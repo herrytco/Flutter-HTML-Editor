@@ -42,12 +42,14 @@ class RichTextEditor extends StatefulWidget {
   /// It is possible to use placeholders in the code. They have to be enclosed
   /// with [placeholderMarker]. If the marker is set to "$" for example, it could
   /// look like $VARIABLE$, which would get substituted in the richtext.
+  /// 
+  /// Per default, all button types are displayed above the editor textfield.
+  /// [availableButtons] can be provided to specify the visible buttons
   ///
   const RichTextEditor({
     Key? key,
     this.labelTextStyle,
     this.showPreview = true,
-    this.showHeaderButton = true,
     this.initialValue,
     this.maxLength,
     this.placeholderMarker = "\\\$",
@@ -60,17 +62,12 @@ class RichTextEditor extends StatefulWidget {
     this.additionalActionButtons,
     this.animatePreviewToEditorPosition = true,
     this.autofocus = false,
-    this.showColorButtons = true,
-    this.showBackgroundColorButtons = true,
     this.previewDecoration = const RendererDecoration(),
     this.availableButtons = ButtonRowType.values,
   }) : super(key: key);
   final TextStyle? labelTextStyle;
   final bool autofocus;
   final bool showPreview;
-  final bool showHeaderButton;
-  final bool showColorButtons;
-  final bool showBackgroundColorButtons;
   final String? initialValue;
   final int? maxLength;
   final String placeholderMarker;
@@ -190,10 +187,7 @@ class _RichTextEditorState extends State<RichTextEditor> {
               _controller,
               widget.availableColors,
               widget.additionalActionButtons ?? [],
-              showHeaderButtons: widget.showHeaderButton,
               decoration: widget.editorDecoration,
-              showBackgroundColorButtons: widget.showBackgroundColorButtons,
-              showColorButtons: widget.showColorButtons,
               availableButtons: widget.availableButtons,
             ),
             SizedBox(height: widget.editorDecoration.buttonEditorSpacing),

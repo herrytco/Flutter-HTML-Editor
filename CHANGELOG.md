@@ -1,3 +1,8 @@
+## 0.3.0
+
+* added an enum to control what button-types are visible in the editor
+* ensured that a `#` is added before every hex-color
+
 ## 0.2.0
 
 * added the style-property `background-color`, that controls the `backgroundColor` attribute of the `Text` displayed

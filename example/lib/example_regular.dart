@@ -33,6 +33,9 @@ class _RegularExampleState extends State<RegularExample> {
             onChanged: (String html) {
               // do something with the richtext
             },
+            availableColors: [
+              "000000",
+            ],
             editorDecoration: EditorDecoration(
               inputStyle: TextStyle(
                 color: Colors.blue,
