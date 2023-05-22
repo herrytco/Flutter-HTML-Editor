@@ -1,3 +1,7 @@
+## 0.3.1
+
+* dependency updates
+
 ## 0.3.0
 
 * added an enum to control what button-types are visible in the editor
