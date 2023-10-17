@@ -1,11 +1,11 @@
 name: light_html_editor
 description: A lightweight HTML editor for Flutter. Provides functionality to edit and parse simple HTML code.
-version: 0.3.1
+version: 0.3.2
 homepage: "https://manuelh.at/"
 repository: https://github.com/herrytco/Flutter-HTML-Editor
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.12.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
