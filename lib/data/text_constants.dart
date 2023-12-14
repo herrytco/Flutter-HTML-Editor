@@ -10,6 +10,9 @@ class TextConstants {
   /// color used if no color is specified
   static const Color defaultColor = Colors.black;
 
+  /// color used if no color is specified
+  static const Color defaultBackgroundColor = Colors.white;
+
   /// link underline when no override was provided
   static const TextDecoration defaultLinkUnderline = TextDecoration.underline;
 

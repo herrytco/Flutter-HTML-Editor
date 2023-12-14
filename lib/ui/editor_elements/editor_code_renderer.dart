@@ -1,30 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/exceptions/parse_exceptions.dart';
-import 'package:light_html_editor/api/text_renderer.dart';
+import 'package:light_html_editor/api/v3/text_renderer.dart';
 import 'package:light_html_editor/data/renderer_decoration.dart';
 import 'package:light_html_editor/editor.dart';
-import 'package:light_html_editor/placeholder.dart';
+import 'package:light_html_editor/api/placeholder.dart';
 
 ///
 /// Lightweight HTML renderer converting basic HTML text into Richtext
 ///
-class RichtextRenderer extends StatelessWidget {
+class LightHtmlRenderer extends StatelessWidget {
   ///
   /// Creates a new instance of an HTML renderer. Takes the root of a parse-tree
   /// as an argument which gets displayed.
   ///
   /// The widget can be styled by setting an appropriate [rendererDecoration].
   ///
-  RichtextRenderer({
+  LightHtmlRenderer({
     Key? key,
     @required this.rawHtml,
     this.maxLength,
     this.maxLines,
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
-    this.rendererDecoration = const RendererDecoration(),
+    this.rendererDecoration = const RendererStyle(),
     this.ignoreLinebreaks = false,
     this.displayErrors = true,
+    required this.scrollController,
   }) : super(key: key) {
     if (maxLines != null && maxLength != null)
       throw Exception("maxLines == null || maxLength == null must be true");
@@ -41,25 +42,28 @@ class RichtextRenderer extends StatelessWidget {
 
   final String placeholderMarker;
   final List<RichTextPlaceholder> placeholders;
-  final RendererDecoration rendererDecoration;
+  final RendererStyle rendererDecoration;
   final bool ignoreLinebreaks;
+
+  final ScrollController scrollController;
 
   ///
   /// Creates a new instance of an HTML renderer. Takes a richtext created by
-  /// [RichTextEditor] as an argument which is parsed into a ParseTree
+  /// [LightHtmlRichTextEditor] as an argument which is parsed into a ParseTree
   ///
   /// The widget can be styled by setting an appropriate [rendererDecoration].
   ///
-  factory RichtextRenderer.fromRichtext(
+  factory LightHtmlRenderer.fromRichtext(
     String richtext, {
     int? maxLength,
     int? maxLines,
-    RendererDecoration rendererDecoration = const RendererDecoration(),
+    RendererStyle rendererDecoration = const RendererStyle(),
     bool ignoreLinebreaks = false,
     String placeholderMarker = "\\\$",
     List<RichTextPlaceholder> placeholders = const [],
+    ScrollController? scrollController,
   }) {
-    return RichtextRenderer(
+    return LightHtmlRenderer(
       rawHtml: richtext,
       maxLength: maxLength,
       maxLines: maxLines,
@@ -67,6 +71,7 @@ class RichtextRenderer extends StatelessWidget {
       ignoreLinebreaks: ignoreLinebreaks,
       placeholderMarker: placeholderMarker,
       placeholders: placeholders,
+      scrollController: scrollController ?? ScrollController(),
     );
   }
 
@@ -75,7 +80,7 @@ class RichtextRenderer extends StatelessWidget {
     RichText? parsedHtml;
 
     try {
-      parsedHtml = TextRenderer(
+      parsedHtml = LightHtmlTextRenderer(
         rawHtml!,
         rendererDecoration,
         maxLength,
@@ -85,6 +90,10 @@ class RichtextRenderer extends StatelessWidget {
         ignoreLinebreaks,
       ).paragraphs;
     } on UnexpectedEndTagException catch (e) {
+      error = "$e";
+    } on UndecodableTagException catch (e) {
+      error = "$e";
+    } on EOFException catch (e) {
       error = "$e";
     }
 
@@ -105,27 +114,12 @@ class RichtextRenderer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Colors.blue[50],
+      height: double.infinity,
       width: double.infinity,
-      decoration: BoxDecoration(
-        border: rendererDecoration.border != null
-            ? rendererDecoration.border!
-            : Border.all(color: Colors.transparent),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            padding: rendererDecoration.padding,
-            width: double.infinity,
-            constraints: BoxConstraints(
-              maxHeight: rendererDecoration.maxHeight != null
-                  ? rendererDecoration.maxHeight!
-                  : double.infinity,
-            ),
-            child: content,
-          ),
-        ],
+      child: SingleChildScrollView(
+        controller: scrollController,
+        child: content,
       ),
     );
   }

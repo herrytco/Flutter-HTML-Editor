@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:light_html_editor/html_editor_controller.dart';
+import 'package:light_html_editor/api/html_editor_controller.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:flutter_html/flutter_html.dart';
 
@@ -11,7 +11,7 @@ class RegularExample extends StatefulWidget {
 }
 
 class _RegularExampleState extends State<RegularExample> {
-  final controller = HtmlEditorController();
+  final controller = LightHtmlEditorController();
   Html htmlBox = Html(
     data: "",
   );
@@ -23,7 +23,7 @@ class _RegularExampleState extends State<RegularExample> {
       body: Center(
         child: SizedBox(
           width: 800,
-          child: RichTextEditor(
+          child: LightHtmlRichTextEditor(
             placeholders: [
               RichTextPlaceholder(
                 "VAR",
@@ -42,8 +42,8 @@ class _RegularExampleState extends State<RegularExample> {
               ),
             ),
             alwaysShowButtons: true,
-            initialValue:
-                'Read more at <a href="https://www.google.at">Google</a>',
+            initialValue: 'text <p>new line :D</p>',
+            // 'Read more at <a href="https://www.google.at">Google</a>',
           ),
         ),
       ),

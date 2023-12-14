@@ -11,10 +11,10 @@ class RendererExample extends StatelessWidget {
       body: Center(
         child: SizedBox(
           width: 400,
-          child: RichtextRenderer.fromRichtext(
+          child: LightHtmlRenderer.fromRichtext(
             "<b>some text to be rendered as a RichText widget</b>",
             maxLength: 10,
-            rendererDecoration: RendererDecoration(
+            rendererDecoration: RendererStyle(
               overflowIndicator: "More...",
             ),
           ),

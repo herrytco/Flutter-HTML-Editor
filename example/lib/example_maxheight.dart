@@ -14,7 +14,7 @@ class MaxHeightExample extends StatelessWidget {
           height: 600,
           color: Colors.blue,
           padding: EdgeInsets.all(8),
-          child: RichTextEditor(
+          child: LightHtmlRichTextEditor(
             placeholders: [
               RichTextPlaceholder(
                 "VAR",

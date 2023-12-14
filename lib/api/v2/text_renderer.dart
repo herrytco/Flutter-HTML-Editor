@@ -16,7 +16,7 @@ class TextRenderer {
   final String rawHtml;
 
   /// renderer settings to be applied
-  final RendererDecoration rendererDecoration;
+  final RendererStyle rendererDecoration;
 
   /// optional maxLength used to cut off the text after a certain number of
   /// characters (tags excluded)

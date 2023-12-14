@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:light_html_editor/ui/button_row.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/light_html_editor.dart';
-import 'package:light_html_editor/ui/selectable_textfield.dart';
 
-import 'html_editor_controller.dart';
+import 'api/html_editor_controller.dart';
 
 ///
 /// Lightweight HTML editor with optional preview function. Uses all width
 /// available and the minimal height. Needs bounded width.
 ///
-class RichTextEditor extends StatefulWidget {
+class LightHtmlRichTextEditor extends StatefulWidget {
   ///
   /// empty method
   ///
@@ -42,11 +41,11 @@ class RichTextEditor extends StatefulWidget {
   /// It is possible to use placeholders in the code. They have to be enclosed
   /// with [placeholderMarker]. If the marker is set to "$" for example, it could
   /// look like $VARIABLE$, which would get substituted in the richtext.
-  /// 
+  ///
   /// Per default, all button types are displayed above the editor textfield.
   /// [availableButtons] can be provided to specify the visible buttons
   ///
-  const RichTextEditor({
+  const LightHtmlRichTextEditor({
     Key? key,
     this.labelTextStyle,
     this.showPreview = true,
@@ -54,7 +53,7 @@ class RichTextEditor extends StatefulWidget {
     this.maxLength,
     this.placeholderMarker = "\\\$",
     this.placeholders = const [],
-    this.onChanged = RichTextEditor._doNothingWithResult,
+    this.onChanged = LightHtmlRichTextEditor._doNothingWithResult,
     this.editorDecoration = const EditorDecoration(),
     this.availableColors = TextConstants.defaultColors,
     this.alwaysShowButtons = false,
@@ -62,7 +61,7 @@ class RichTextEditor extends StatefulWidget {
     this.additionalActionButtons,
     this.animatePreviewToEditorPosition = true,
     this.autofocus = false,
-    this.previewDecoration = const RendererDecoration(),
+    this.previewDecoration = const RendererStyle(),
     this.availableButtons = ButtonRowType.values,
   }) : super(key: key);
   final TextStyle? labelTextStyle;
@@ -79,19 +78,20 @@ class RichTextEditor extends StatefulWidget {
   final List<ButtonRowType> availableButtons;
 
   final EditorDecoration editorDecoration;
-  final HtmlEditorController? controller;
+  final LightHtmlEditorController? controller;
 
-  final RendererDecoration previewDecoration;
+  final RendererStyle previewDecoration;
 
-  final Function(String) onChanged;
+  final void Function(String valueNew) onChanged;
 
   @override
-  _RichTextEditorState createState() => _RichTextEditorState();
+  _LightHtmlRichTextEditorState createState() =>
+      _LightHtmlRichTextEditorState();
 }
 
-class _RichTextEditorState extends State<RichTextEditor> {
+class _LightHtmlRichTextEditorState extends State<LightHtmlRichTextEditor> {
   /// used to control the HTML text and cursor position/selection
-  late HtmlEditorController _controller;
+  late LightHtmlEditorController _controller;
 
   /// focusNode of the editor input field
   FocusNode _focusNode = FocusNode();
@@ -103,13 +103,16 @@ class _RichTextEditorState extends State<RichTextEditor> {
 
   @override
   void initState() {
-    _controller = widget.controller ?? new HtmlEditorController();
-    _controller.editorFocusNode = _focusNode;
+    _controller = widget.controller ?? LightHtmlEditorController();
+    _controller.text = widget.initialValue ?? "";
+
+    _controller.addListener(() {
+      setState(() {
+        widget.onChanged(_controller.text);
+      });
+    });
 
     _areButtonsVisible = widget.alwaysShowButtons;
-
-    // copy in initial value if provided
-    if (_controller.text.isEmpty) _controller.text = widget.initialValue ?? "";
 
     // initialize event handler for hiding buttons
     if (!widget.alwaysShowButtons)
@@ -118,12 +121,6 @@ class _RichTextEditorState extends State<RichTextEditor> {
           _areButtonsVisible = _focusNode.hasFocus;
         });
       });
-
-    _controller.addListener(() {
-      setState(() {
-        widget.onChanged(_controller.text);
-      });
-    });
 
     _setupAutoScroll();
 
@@ -194,36 +191,32 @@ class _RichTextEditorState extends State<RichTextEditor> {
           ],
           Expanded(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) => Column(
-                      children: [
-                        Text(
-                          widget.editorDecoration.editorLabel ?? "Raw",
-                          style: widget.labelTextStyle,
-                        ),
-                        Container(
-                          height: constraints.maxHeight - 27,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                          ),
+                  child: Column(
+                    children: [
+                      Text(
+                        widget.editorDecoration.editorLabel ?? "Raw",
+                        style: widget.labelTextStyle,
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: widget.editorDecoration.borderRadius,
                             border: widget.editorDecoration.border,
                           ),
-                          child: SelectableTextfield(
-                            widget.editorDecoration,
-                            _controller,
-                            _focusNode,
-                            maxLength: widget.maxLength,
+                          child: LightHtmlEditorTextField(
                             autofocus: widget.autofocus,
+                            editorDecoration: widget.editorDecoration,
+                            onChanged: widget.onChanged,
+                            controller: _controller,
+                            initialValue: widget.initialValue,
+                            maxLength: widget.maxLength,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 if (widget.showPreview) ...[
@@ -235,27 +228,16 @@ class _RichTextEditorState extends State<RichTextEditor> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            "Preview",
+                            widget.previewDecoration.label ?? "Preview",
                             style: widget.labelTextStyle,
                           ),
                           Expanded(
-                            child: SingleChildScrollView(
-                              controller: _previewScrollController,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4.0),
-                                  border: widget.previewDecoration.border,
-                                ),
-                                child: RichtextRenderer.fromRichtext(
-                                  _controller.text,
-                                  placeholders: widget.placeholders,
-                                  placeholderMarker: widget.placeholderMarker,
-                                  rendererDecoration: widget.previewDecoration,
-                                ),
-                              ),
+                            child: LightHtmlRenderer.fromRichtext(
+                              _controller.text,
+                              placeholders: widget.placeholders,
+                              placeholderMarker: widget.placeholderMarker,
+                              rendererDecoration: widget.previewDecoration,
+                              scrollController: _previewScrollController,
                             ),
                           ),
                         ],

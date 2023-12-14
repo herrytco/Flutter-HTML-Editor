@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/operations/property_operation.dart';
 import 'package:light_html_editor/api/operations/tag_operation.dart';
 import 'package:light_html_editor/data/editor_properties.dart';
-import 'package:light_html_editor/html_editor_controller.dart';
+import 'package:light_html_editor/api/html_editor_controller.dart';
 import 'package:light_html_editor/ui/buttons/background_color_button.dart';
 import 'package:light_html_editor/ui/buttons/color_button.dart';
 import 'package:light_html_editor/ui/buttons/custom_button.dart';
@@ -24,7 +24,7 @@ enum ButtonRowType {
 
 ///
 /// A row of buttons controlling text-operations available in the editor
-/// 
+///
 class ButtonRow extends StatelessWidget {
   const ButtonRow(
     this.controller,
@@ -37,7 +37,7 @@ class ButtonRow extends StatelessWidget {
 
   final List<String> availableColors;
   final List<Widget> additionalButtons;
-  final HtmlEditorController controller;
+  final LightHtmlEditorController controller;
   final EditorDecoration decoration;
   final List<ButtonRowType> availableButtons;
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/editor.dart';
-import 'package:light_html_editor/html_editor_controller.dart';
+import 'package:light_html_editor/api/html_editor_controller.dart';
 
 class ExternalControllerDemo extends StatefulWidget {
   const ExternalControllerDemo({Key? key}) : super(key: key);
@@ -10,7 +10,7 @@ class ExternalControllerDemo extends StatefulWidget {
 }
 
 class _ExternalControllerDemoState extends State<ExternalControllerDemo> {
-  final _controller = HtmlEditorController();
+  final _controller = LightHtmlEditorController();
 
   @override
   void initState() {
@@ -25,7 +25,7 @@ class _ExternalControllerDemoState extends State<ExternalControllerDemo> {
       body: Center(
         child: SizedBox(
           width: 400,
-          child: RichTextEditor(
+          child: LightHtmlRichTextEditor(
             controller: _controller,
           ),
         ),

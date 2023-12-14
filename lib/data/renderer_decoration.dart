@@ -5,14 +5,12 @@ import 'package:light_html_editor/data/text_constants.dart';
 ///
 /// collection of style properties for the RichtextRenderer
 ///
-class RendererDecoration {
-  final BoxBorder? border;
+class RendererStyle {
   final BorderRadiusGeometry? borderRadius;
   final String? label;
   final TextStyle labelStyle;
   final Color defaultColor;
-  final EdgeInsets padding;
-  final double? maxHeight;
+  final Color defaultBackgroundColor;
   final Color? linkColor;
   final bool? linkUnderline;
   final bool autoScroll;
@@ -24,15 +22,13 @@ class RendererDecoration {
 
   final TextStyle errorStyle;
 
-  const RendererDecoration({
-    this.border,
+  const RendererStyle({
     this.borderRadius,
     this.label,
     this.labelStyle = TextConstants.labelStyle,
     this.defaultColor = TextConstants.defaultColor,
-    this.padding = const EdgeInsets.all(8),
+    this.defaultBackgroundColor = TextConstants.defaultBackgroundColor,
     this.autoScroll = true,
-    this.maxHeight,
     this.linkColor,
     this.linkUnderline,
     this.overflowIndicator = "...",

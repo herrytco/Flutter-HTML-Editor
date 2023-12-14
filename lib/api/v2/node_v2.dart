@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:light_html_editor/api/richtext_node.dart';
+import 'package:light_html_editor/api/tag.dart';
 import 'package:light_html_editor/data/color_utils.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 

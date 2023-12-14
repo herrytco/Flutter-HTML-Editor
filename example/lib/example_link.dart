@@ -11,7 +11,7 @@ class LinkExample extends StatelessWidget {
       body: Center(
         child: SizedBox(
           width: 400,
-          child: RichTextEditor(
+          child: LightHtmlRichTextEditor(
             placeholders: [
               RichTextPlaceholder(
                 "VAR",

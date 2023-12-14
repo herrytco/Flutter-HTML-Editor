@@ -1,3 +1,8 @@
+## 0.4.0
+
+* renamed symbols
+* reorganized editor widget to be less convoluted and verbose
+
 ## 0.3.3
 
 * dependency updates

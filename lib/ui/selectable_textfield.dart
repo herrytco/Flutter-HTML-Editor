@@ -17,26 +17,22 @@ class SelectableTextfield extends StatefulWidget {
   ///
   /// [focusNode] is used to check if the field is focused or not
   ///
-  /// [onSelectionChange] is fired each time the selection changes to notify the
-  /// caller
-  ///
   const SelectableTextfield(
     this.editorDecoration,
     this.controller,
-    // this.onSelectionChange,
     this.focusNode, {
     Key? key,
     this.maxLength,
     required this.autofocus,
+    this.scrollController,
   }) : super(key: key);
 
   final bool autofocus;
   final int? maxLength;
+  final ScrollController? scrollController;
   final EditorDecoration editorDecoration;
   final TextEditingController controller;
   final FocusNode focusNode;
-
-  // final Function(TextSelection) onSelectionChange;
 
   @override
   _SelectableTextfieldState createState() => _SelectableTextfieldState();
@@ -44,18 +40,10 @@ class SelectableTextfield extends StatefulWidget {
 
 class _SelectableTextfieldState extends State<SelectableTextfield> {
   @override
-  void initState() {
-    // widget.controller.addListener(() {
-    //   if (widget.focusNode.hasFocus)
-    //     widget.onSelectionChange(widget.controller.selection);
-    // });
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return TextFormField(
       autofocus: widget.autofocus,
+      scrollController: widget.scrollController,
       buildCounter: (
         context, {
         int? currentLength,
@@ -85,7 +73,6 @@ class _SelectableTextfieldState extends State<SelectableTextfield> {
         enabledBorder: InputBorder.none,
         focusedBorder: InputBorder.none,
         counterText: "",
-        contentPadding: EdgeInsets.symmetric(vertical: 14.0),
       ),
       cursorColor: widget.editorDecoration.cursorColor,
       style: GoogleFonts.getFont('Ubuntu Mono').copyWith(

@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/operations/property_operation.dart';
 import 'package:light_html_editor/api/operations/tag_operation.dart';
-import 'package:light_html_editor/api/parser.dart';
-import 'package:light_html_editor/api/richtext_node.dart';
+import 'package:light_html_editor/api/v2/parser.dart';
+import 'package:light_html_editor/api/tag.dart';
 import 'package:light_html_editor/api/v2/node_v2.dart';
 
-class HtmlEditorController extends TextEditingController {
-  HtmlEditorController({String? text}) : super(text: text) {
+class LightHtmlEditorController extends TextEditingController {
+  LightHtmlEditorController({String? text}) : super(text: text) {
     addListener(() {
       if (!canUndo || _oldText == null) {
         _oldText = this.text;

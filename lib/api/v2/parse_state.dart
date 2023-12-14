@@ -1,3 +1,7 @@
+///
+/// represents the current state of the parser, what text has been parsed,
+/// what is left and where the cursor currently stands
+///
 class ParseState {
   final String rawText;
   String remainingText;

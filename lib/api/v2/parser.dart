@@ -1,6 +1,6 @@
 import 'package:light_html_editor/api/exceptions/parse_exceptions.dart';
 import 'package:light_html_editor/api/regex_provider.dart';
-import 'package:light_html_editor/api/richtext_node.dart';
+import 'package:light_html_editor/api/tag.dart';
 import 'package:light_html_editor/api/v2/node_v2.dart';
 import 'package:light_html_editor/api/v2/parse_state.dart';
 import 'package:light_html_editor/light_html_editor.dart';
@@ -83,8 +83,8 @@ class Parser {
           NodeV2 nodeNew = NodeV2.fromTag(k, tag);
           k.addChild(nodeNew);
 
-          state.textOffset += nextTagMatch.start + tag.rawTagLength;
-          state.remainingText = state.remainingText.substring(tag.rawTagLength);
+          state.textOffset += nextTagMatch.start + tag.size;
+          state.remainingText = state.remainingText.substring(tag.size);
           state = _parseAndAddTo(nodeNew, state);
         } else {
           // encountered an end-tag
@@ -92,8 +92,8 @@ class Parser {
             throw UnexpectedEndTagException(k.tagName, tag.name);
           }
 
-          state.textOffset += tag.rawTagLength;
-          state.remainingText = state.remainingText.substring(tag.rawTagLength);
+          state.textOffset += tag.size;
+          state.remainingText = state.remainingText.substring(tag.size);
           return state;
         }
       }
