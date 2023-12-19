@@ -136,12 +136,6 @@ class NodeV3 {
 
     splitPoints.add(scopeEnd - scopeStart);
 
-    if (content == "new line :D") {
-      print("scopeStart:$scopeStart, scopeEnd:$scopeEnd");
-      print("selection($selectionStart, $selectionEnd)");
-      print("$splitPoints");
-    }
-
     int myIdx = parentIndex;
     List<NodeV3> split = [];
 
@@ -319,8 +313,6 @@ class NodeV3 {
   }
 
   void printTree({int spaceOffset = 0}) {
-    print(" " * spaceOffset + "$this");
-
     for (var child in children) {
       child.printTree(spaceOffset: spaceOffset + 2);
     }

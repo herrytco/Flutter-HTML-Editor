@@ -221,8 +221,6 @@ class LightHtmlTextRenderer {
             ["color"],
           ));
 
-        print(colorQueryResult);
-
         String? backgroundColorQueryResult = k.query(NodeQuery(
           [QueryType.styleProperty],
           ["background-color"],
