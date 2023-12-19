@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/operations/property_operation.dart';
 import 'package:light_html_editor/api/operations/tag_operation.dart';
-import 'package:light_html_editor/api/v2/parser.dart';
 import 'package:light_html_editor/api/tag.dart';
-import 'package:light_html_editor/api/v2/node_v2.dart';
+import 'package:light_html_editor/api/v3/node_v3.dart';
+import 'package:light_html_editor/api/v3/parser.dart';
 
 class LightHtmlEditorController extends TextEditingController {
   LightHtmlEditorController({String? text}) : super(text: text) {
@@ -83,6 +81,88 @@ class LightHtmlEditorController extends TextEditingController {
   }
 
   ///
+  /// Adds a style-property to the current selection of text. If there is an
+  /// existing tag around the exact selection, the property gets added to this
+  /// tag. A <span>-tag will be created otherwise.
+  ///
+  void insertStyleProperty(StylePropertyOperation op) {
+    _cache();
+
+    int opStart = selection.start;
+    int opEnd = selection.end;
+
+    NodeV3 tree = LightHtmlParserV3().parse(text);
+
+    if (opStart == opEnd) {
+      var startTag = "<span style=\"${op.propertyKey}:${op.propertyValue}\">";
+      var endTag = "</span>";
+      text = text.substring(0, opStart) +
+          "$startTag$endTag" +
+          text.substring(opStart);
+      opStart += startTag.length;
+      opEnd += startTag.length;
+      tree = LightHtmlParserV3().parse(text);
+    } else {
+      bool wasOffset2 = false, wasOffset = false;
+
+      // pass 1: split only partly affected nodes into new simple nodes
+      List<NodeV3> affectedNodes = tree.select(opStart, opEnd);
+      affectedNodes.forEach((element) {
+        element.splitForSelection(opStart, opEnd);
+      });
+      affectedNodes = tree.select(opStart, opEnd);
+
+      // pass 2: insert spans for not fully selected nodes
+      affectedNodes
+          .where((element) =>
+              element.parent!.isRoot ||
+              !element.parent!.isFullySelected(opStart, opEnd))
+          .forEach((element) {
+        var tag = Tag.decodeTag("<span>");
+        element.insertTagNodeAbove(tag);
+
+        if (!wasOffset) {
+          opStart += tag.size;
+          wasOffset = true;
+        }
+
+        opEnd += tag.endTagSize + tag.size;
+      });
+
+      // pass 2: insert/append style tags into selected nodes
+      for (NodeV3 affectedNode in affectedNodes) {
+        NodeV3 affectedParent = affectedNode.parent!;
+
+        // 2.1 - fully selected parent: add the property to the parent tag
+        if (affectedParent.isTag) {
+          Tag parentTag = affectedParent.tag!;
+
+          var lengthBefore = parentTag.rawTag.length;
+          parentTag.putStyleProperty(op.propertyKey, op.propertyValue);
+
+          int offset = parentTag.rawTag.length - lengthBefore;
+
+          // move the start value to the start of the piece of content that gets wrapped with the style
+          if (!wasOffset2) {
+            opStart += offset;
+            opEnd = opStart + affectedNode.content!.length;
+            wasOffset2 = true;
+          }
+        }
+      }
+    }
+
+    if (editorFocusNode != null) {
+      editorFocusNode!.requestFocus();
+    }
+
+    value = value.copyWith(
+      text: tree.toHtml(),
+      selection: TextSelection(baseOffset: opStart, extentOffset: opEnd),
+    );
+  }
+
+  ///
   /// Wraps the current text-selection a symmetric pair of tags. If no text is
   /// selected, an empty tag-pair is inserted at the current cursor position.
   /// If the field is not focused, the empty tag-pair is appended to the current
@@ -98,92 +178,6 @@ class LightHtmlEditorController extends TextEditingController {
   }
 
   ///
-  /// Adds a style-property to the current selection of text. If there is an
-  /// existing tag around the exact selection, the property gets added to this
-  /// tag. A <span>-tag will be created otherwise.
-  ///
-  void insertStyleProperty(StylePropertyOperation op) {
-    _cache();
-
-    op.setSelection(selection);
-
-    NodeV2 tree = Parser().parse(text);
-
-    int opStart = op.start!;
-    int opEnd = op.end!;
-
-    // pass 1: split only partly affected nodes into new simple nodes
-    List<SimpleNode> affectedNodes = tree.getNodesInSelection(opStart, opEnd);
-    _splitOnlyPartiallySelectedNodes(affectedNodes, opStart, opEnd);
-
-    // pass 2: apply new tag to all (now only full-selection) nodes
-    List<SimpleNode> changedNodes = [];
-    affectedNodes = tree.getNodesInSelection(opStart, opEnd);
-
-    for (SimpleNode affectedNode in affectedNodes) {
-      NodeV2 affectedParent = affectedNode.parent!;
-
-      // selection fully contains a node -> insert the attribute in its parent
-      if (affectedNode.isFullySelected(opStart, opEnd)) {
-        changedNodes.add(affectedNode);
-
-        if (affectedParent.tagName.isNotEmpty &&
-            affectedParent.isFullySelected(opStart, opEnd)) {
-          int offset = _extendNodeWithStyle(affectedParent, op);
-
-          // apply the offset to all nodes and the selection end
-          _applyOffsetToNodes(affectedNode.root, offset, affectedNode);
-          opEnd += offset;
-        } else {
-          int offset = _insertTagNodeBetween(affectedParent, affectedNode,
-              TagOperation('<span $op>', '</span>', 'span'));
-
-          // apply the offset to all nodes and the selection end
-          _applyOffsetToNodes(affectedNode.root, offset, affectedNode);
-          opEnd += offset;
-        }
-      }
-    }
-
-    if (changedNodes.isNotEmpty) {
-      int iStart = changedNodes.map((e) => e.textIndexStart).reduce(min);
-      int iEnd = changedNodes.map((e) => e.textIndexEnd).reduce(max) + 1;
-
-      if (editorFocusNode != null) {
-        editorFocusNode!.requestFocus();
-        value = value.copyWith(
-          text: tree.toHtml(),
-          selection: TextSelection(baseOffset: iStart, extentOffset: iEnd),
-        );
-      }
-    } else {
-      value = value.copyWith(
-        text: tree.toHtml(),
-      );
-    }
-  }
-
-  int _extendNodeWithStyle(NodeV2 node, StylePropertyOperation op) {
-    String styleString = "${op.propertyKey}:${op.propertyValue}";
-    int offset = 0;
-
-    if (node.styleProperty == null) {
-      // no style tag exists
-      node.properties.add(StyleProperty.fromStyleString(styleString));
-
-      offset = 9 + styleString.length;
-    } else {
-      bool newKeyAdded =
-          node.styleProperty!.putProperty(op.propertyKey, op.propertyValue);
-
-      offset = newKeyAdded ? styleString.length + 1 : 0;
-    }
-
-    node.textIndexStart += offset;
-    return offset;
-  }
-
-  ///
   /// Wraps the current text-selection with the provided tags. If no text is
   /// selected, an empty tag-pair is inserted at the current cursor position.
   /// If the field is not focused, the empty tag-pair is appended to the current
@@ -194,122 +188,63 @@ class LightHtmlEditorController extends TextEditingController {
   ///
   void wrapWithStartAndEnd(TagOperation op) {
     _cache();
-    op.setSelection(selection);
 
-    NodeV2 tree = Parser().parse(text);
+    int opStart = selection.start;
+    int opEnd = selection.end;
 
-    int opStart = op.start!;
-    int opEnd = op.end!;
+    NodeV3 tree = LightHtmlParserV3().parse(text);
 
-    // pass 1: split only partly affected nodes into new simple nodes
-    List<SimpleNode> affectedNodes = tree.getNodesInSelection(opStart, opEnd);
-    _splitOnlyPartiallySelectedNodes(affectedNodes, opStart, opEnd);
+    if (opStart == opEnd) {
+      var startTag = "<${op.tagName}>";
+      var endTag = "</${op.tagName}>";
+      text = text.substring(0, opStart) +
+          "$startTag$endTag" +
+          text.substring(opStart);
+      opStart += startTag.length;
+      opEnd += startTag.length;
+      tree = LightHtmlParserV3().parse(text);
+    } else {
+      bool wasOffset = false;
 
-    // pass 2: apply new tag to all (now only full-selection) nodes
-    affectedNodes = tree.getNodesInSelection(op.start!, op.end!);
-    List<SimpleNode> changedNodes = [];
+      // pass 1: split only partly affected nodes into new simple nodes
+      List<NodeV3> affectedNodes = tree.select(opStart, opEnd);
+      affectedNodes.forEach((element) {
+        element.splitForSelection(opStart, opEnd);
+      });
+      affectedNodes = tree.select(opStart, opEnd);
 
-    for (SimpleNode affectedNode in affectedNodes) {
-      NodeV2 affectedParent = affectedNode.parent!;
+      // snap selection to closest content node
+      opStart = affectedNodes
+          .map((e) => e.scopeStart)
+          .reduce((value, element) => element > value ? value : element);
+      opEnd = affectedNodes
+          .map((e) => e.scopeEnd)
+          .reduce((value, element) => element < value ? value : element);
 
-      // selection fully contains a node -> insert the attribute in its parent
-      if (affectedNode.isFullySelected(opStart, opEnd)) {
-        int offset = _insertTagNodeBetween(affectedParent, affectedNode, op);
+      // pass 2: apply new tag to all (now only full-selection) nodes
+      Tag tagToInsert = Tag.decodeTag(op.startTag);
+      for (var affectedNode in affectedNodes) {
+        var subtreeRootNew = affectedNode.insertTagNodeAbove(tagToInsert);
 
-        // apply the offset to all nodes and the selection end
-        _applyOffsetToNodes(affectedNode.root, offset, affectedNode);
-        opEnd += offset;
-
-        changedNodes.add(affectedNode);
+        if (!wasOffset) {
+          opStart += subtreeRootNew.tag!.size;
+          opEnd = opStart + affectedNode.content!.length;
+          wasOffset = true;
+        }
       }
-    }
-
-    if (changedNodes.isNotEmpty) {
-      int iStart = changedNodes.map((e) => e.textIndexStart).reduce(min);
-      int iEnd = changedNodes.map((e) => e.textIndexEnd).reduce(max) + 1;
 
       if (editorFocusNode != null) {
         editorFocusNode!.requestFocus();
-        value = value.copyWith(
-          text: tree.toHtml(),
-          selection: TextSelection(baseOffset: iStart, extentOffset: iEnd),
-        );
       }
-    } else {
-      value = value.copyWith(
-        text: tree.toHtml(),
-      );
     }
-  }
 
-  void _splitOnlyPartiallySelectedNodes(
-      List<SimpleNode> affectedNodes, int opStart, int opEnd) {
-    for (SimpleNode affectedNode in affectedNodes) {
-      if (affectedNode.isFullySelected(opStart, opEnd)) continue;
-
-      NodeV2 affectedParent = affectedNode.parent!;
-
-      int startLocal = max(0, opStart - affectedNode.textIndexStart);
-      int endLocal = min(
-          opEnd - affectedNode.textIndexStart, affectedNode.body.length - 1);
-
-      List<String> bodyParts = [
-        affectedNode.body.substring(0, startLocal),
-        affectedNode.body.substring(startLocal, endLocal + 1),
-        affectedNode.body.substring(endLocal + 1),
-      ].where((element) => element.isNotEmpty).toList();
-
-      int offsetChild = affectedNode.textIndexStart;
-      int startIndex = affectedParent.children.indexOf(affectedNode);
-      int idOld = affectedNode.id;
-      affectedParent.children.remove(affectedNode);
-
-      for (String part in bodyParts) {
-        var childNew = SimpleNode(affectedParent, offsetChild, part);
-        offsetChild += part.length;
-
-        affectedParent.addChild(childNew, startIndex++);
-      }
-
-      affectedParent.root
-          .getLeaves()
-          .where((element) => element.id > idOld)
-          .forEach((element) => element.refreshId());
-    }
-  }
-
-  /// selects all nodes in [affectedNodes] that have a higher index than [source]
-  /// and raises their [textIndexStart] by [offset].
-  void _applyOffsetToNodes(NodeV2 tree, int offset, SimpleNode source) {
-    tree
-        .getLeaves()
-        .where((element) => element.id > source.id)
-        .forEach((element) {
-      element.textIndexStart += offset;
-    });
-  }
-
-  /// inserts a new node into the graph between [parent] and [child]. The new
-  /// node is only inserted, if the parent is not already of the type of the
-  /// new node. The return value is the string offset that needs to be applied
-  /// to all nodes right of [child]. It is the number of characters contained
-  /// in the newly added start- and end-tag. [child] itself is offset by only
-  /// the width of the start-tag.
-  int _insertTagNodeBetween(NodeV2 parent, SimpleNode child, TagOperation op) {
-    // ignore the operation if the parent already has the correct type
-    if (parent.tagName == op.tagName) return 0;
-
-    NodeV2 parentNew = NodeV2.fromTag(
-      parent,
-      Tag.decodeTag(op.startTag),
+    value = value.copyWith(
+      text: tree.toHtml(),
+      selection: TextSelection(
+        baseOffset: opStart,
+        extentOffset: opEnd,
+      ),
     );
-
-    parent.children[parent.children.indexOf(child)] = parentNew;
-    parentNew.children.add(child);
-
-    child.textIndexStart += parentNew.fullTag.length;
-
-    return parentNew.fullTag.length + op.endTag.length;
   }
 
   void _cache() {

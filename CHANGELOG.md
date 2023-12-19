@@ -2,6 +2,9 @@
 
 * renamed symbols
 * reorganized editor widget to be less convoluted and verbose
+* changed default selection behavior: if multiple nodes are edited/inserted, only the first affected node will hold the selection
+* changed API and styling options of visual elements
+
 
 ## 0.3.3
 

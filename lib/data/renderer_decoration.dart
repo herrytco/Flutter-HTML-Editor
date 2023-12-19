@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:light_html_editor/data/renderer_text_properties.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 
@@ -29,7 +29,7 @@ class RendererStyle {
     this.defaultColor = TextConstants.defaultColor,
     this.defaultBackgroundColor = TextConstants.defaultBackgroundColor,
     this.autoScroll = true,
-    this.linkColor,
+    this.linkColor = Colors.blue,
     this.linkUnderline,
     this.overflowIndicator = "...",
     this.textProperties = const [],

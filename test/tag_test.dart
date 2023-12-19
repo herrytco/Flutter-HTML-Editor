@@ -58,4 +58,28 @@ void main() {
       throwsA(isA<UndecodableTagException>()),
     );
   });
+
+  test('tag: test style injection in blank node', () {
+    var tag = Tag.decodeTag("<b>");
+
+    var before = tag.rawTag;
+
+    expect("<b>", equals(before));
+
+    tag.putStyleProperty("font-size", "12");
+
+    var after = tag.rawTag;
+
+    expect(after, equals("<b style=\"font-size:12;\">"));
+  });
+
+  test('tag: test style injection in node with existing style prop', () {
+    var tag = Tag.decodeTag("<b style=\"font-size:12\">");
+
+    tag.putStyleProperty("font-size", "40");
+
+    var after = tag.rawTag;
+
+    expect(after, equals("<b style=\"font-size:40;\">"));
+  });
 }

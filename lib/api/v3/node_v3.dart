@@ -16,6 +16,24 @@ class NodeV3 {
   /// Children nodes.
   final List<NodeV3> children = [];
 
+  /// path from this to root
+  NodeV3 get root => pathToRoot.last;
+
+  List<NodeV3> get pathToRoot {
+    List<NodeV3> result = [];
+
+    var k = this;
+
+    while (!k.isRoot) {
+      result.add(k);
+      k = k.parent!;
+    }
+
+    result.add(k);
+
+    return result;
+  }
+
   NodeV3(
     this.start,
     this.end, {
@@ -25,6 +43,164 @@ class NodeV3 {
   }) {
     if (tag != null && content != null)
       throw Exception("content and tag cannot both be != null");
+  }
+
+  /// creates a valid start-tag representation for this node (HTML)
+  String get startHtmlTag {
+    if (tag == null) return "";
+
+    return tag!.rawTag;
+  }
+
+  void putStyleProperty(String stylePropertyKey, String value) {
+    if (tag == null) {
+      throw Exception("Cannot add style property to plaintext node!");
+    }
+
+    Tag t = tag!;
+    t.styleProperties[stylePropertyKey] = value;
+  }
+
+  /// creates a valid end-tag representation for this node (HTML)
+  String get endHtmlTag => tag == null ? "" : "</${tag!.name}>";
+
+  String toHtml() {
+    String html = startHtmlTag;
+
+    if (content != null) html += content!;
+
+    for (NodeV3 child in children) {
+      html += child.toHtml();
+    }
+
+    return html + endHtmlTag;
+  }
+
+  NodeV3 deleteFromTree() {
+    if (parent == null) {
+      throw Exception("Cannot delete tree root!");
+    }
+
+    parent!.children.remove(this);
+
+    return this;
+  }
+
+  void offset({
+    int startOffset = 0,
+    int endOffset = 0,
+  }) {
+    start += startOffset;
+    end += endOffset;
+  }
+
+  NodeV3 insertTagNodeAbove(Tag tag) {
+    int myIdx = parentIndex;
+    deleteFromTree();
+
+    NodeV3 nodeNew = NodeV3(
+      scopeStart,
+      scopeEnd,
+      tag: tag,
+      parent: parent,
+    );
+
+    parent!.addChild(nodeNew, myIdx);
+    nodeNew.addChild(this);
+    this.parent = nodeNew;
+
+    return nodeNew;
+  }
+
+  int get parentIndex => parent == null ? -1 : parent!.children.indexOf(this);
+
+  void splitForSelection(int selectionStart, int selectionEnd) {
+    if (!hasPlaintextSelectionMatch(selectionStart, selectionEnd)) {
+      throw Exception(
+          "Selection ($selectionStart, $selectionEnd) has no match");
+    }
+
+    if (parent == null) {
+      throw Exception("Cannot split root node");
+    }
+
+    List<int> splitPoints = [0];
+
+    if (selectionStart > scopeStart) {
+      splitPoints.add(selectionStart - scopeStart);
+    }
+
+    if (selectionEnd < scopeEnd) {
+      splitPoints.add(selectionEnd - scopeStart);
+    }
+
+    splitPoints.add(scopeEnd - scopeStart);
+
+    if (content == "new line :D") {
+      print("scopeStart:$scopeStart, scopeEnd:$scopeEnd");
+      print("selection($selectionStart, $selectionEnd)");
+      print("$splitPoints");
+    }
+
+    int myIdx = parentIndex;
+    List<NodeV3> split = [];
+
+    for (int i = 0; i < splitPoints.length - 1; i++) {
+      int pStart = splitPoints[i];
+      int pEnd = splitPoints[i + 1];
+
+      String splitContent = content!.substring(pStart, pEnd);
+
+      split.add(
+        NodeV3(
+          pStart + scopeStart,
+          pEnd + scopeStart,
+          content: splitContent,
+          parent: parent,
+        ),
+      );
+    }
+
+    deleteFromTree();
+    parent!.addChildren(split, myIdx);
+  }
+
+  List<NodeV3> select(int selectionStart, int selectionEnd) {
+    if (hasPlaintextSelectionMatch(selectionStart, selectionEnd)) {
+      return [this];
+    }
+
+    List<NodeV3> result = [];
+
+    for (var child in children) {
+      result.addAll(child.select(selectionStart, selectionEnd));
+    }
+
+    return result;
+  }
+
+  bool hasPlaintextSelectionMatch(int selectionStart, int selectionEnd) {
+    return this.isPlaintext && isSelected(selectionStart, selectionEnd);
+  }
+
+  bool isFullySelected(int selectionStart, int selectionEnd) {
+    return (selectionStart <= innerScopeStart && selectionEnd >= innerScopeEnd);
+  }
+
+  bool isSelected(int selectionStart, int selectionEnd) {
+    return selectionEnd > scopeStart && selectionStart < scopeEnd;
+  }
+
+  int get innerScopeStart {
+    if (!isTag) throw Exception("Plaintext nodes do not have inner scopes");
+
+    return scopeStart + tag!.size;
+  }
+
+  int get innerScopeEnd {
+    if (!isTag) throw Exception("Plaintext nodes do not have inner scopes");
+
+    return scopeEnd - tag!.endTagSize;
   }
 
   int get scopeStart => start;
@@ -102,8 +278,20 @@ class NodeV3 {
     }
   }
 
-  void addChild(NodeV3 child) {
-    children.add(child);
+  void addChildren(List<NodeV3> elements, [int? position]) {
+    if (position == null) {
+      children.addAll(elements);
+    } else {
+      children.insertAll(position, elements);
+    }
+  }
+
+  void addChild(NodeV3 child, [int? position]) {
+    if (position == null) {
+      children.add(child);
+    } else {
+      children.insert(position, child);
+    }
   }
 
   bool get hasChildren => children.isNotEmpty;

@@ -14,7 +14,7 @@ class Tag {
   final String name;
 
   /// complete tag includin properties and brackets
-  final String rawTag;
+  String rawTag;
 
   /// start, or end-tag
   final bool isStart;
@@ -30,6 +30,34 @@ class Tag {
 
   /// size of the corresponding end-tag. is equal to this.size if isStart is false
   int get endTagSize => name.length + 3;
+
+  void putStyleProperty(String stylePropertyKey, String value) {
+    // update the raw tag with as little changes as possible
+
+    // create a style="" if not already present
+    RegExp styleExpressionQuery = RegExp(r'style=".*"');
+    if (!styleExpressionQuery.hasMatch(rawTag)) {
+      rawTag = rawTag.substring(0, rawTag.length - 1) + " style=\"\">";
+    }
+
+    // if the style property is there, cut it
+    var match = styleExpressionQuery.firstMatch(rawTag)!;
+    if (styleProperties.containsKey(stylePropertyKey)) {
+      var stylePropertyQuery =
+          RegExp("$stylePropertyKey:.*[;\"]").firstMatch(rawTag)!;
+
+      rawTag = rawTag.substring(0, stylePropertyQuery.start) +
+          rawTag.substring(stylePropertyQuery.end - 1);
+    }
+
+    // account for style="
+    var start = match.start + 7;
+    rawTag = rawTag.substring(0, start) +
+        "$stylePropertyKey:$value;" +
+        rawTag.substring(start);
+
+    styleProperties[stylePropertyKey] = value;
+  }
 
   /// creates a new tag-representation. and decodes the "style" tag if present
   Tag(this.name, this.rawTag, this.properties, this.isStart, this.size) {

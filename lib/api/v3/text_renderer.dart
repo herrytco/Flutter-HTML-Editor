@@ -206,9 +206,22 @@ class LightHtmlTextRenderer {
         ));
 
         String? colorQueryResult = k.query(NodeQuery(
-          [QueryType.property, QueryType.styleProperty],
-          ["color"],
+          [QueryType.tag],
+          ["a"],
         ));
+
+        if (colorQueryResult == "a" && rendererStyle.linkColor != null) {
+          colorQueryResult =
+              "#${rendererStyle.linkColor!.value.toRadixString(16)}";
+        }
+
+        if (colorQueryResult == null)
+          colorQueryResult = k.query(NodeQuery(
+            [QueryType.property, QueryType.styleProperty],
+            ["color"],
+          ));
+
+        print(colorQueryResult);
 
         String? backgroundColorQueryResult = k.query(NodeQuery(
           [QueryType.styleProperty],
@@ -217,7 +230,7 @@ class LightHtmlTextRenderer {
 
         String? underlineQueryResult = k.query(NodeQuery(
           [QueryType.tag],
-          ["u"],
+          ["u", "a"],
         ));
         String? strikeThroughQueryResult = k.query(NodeQuery(
           [QueryType.tag],

@@ -42,8 +42,8 @@ class _RegularExampleState extends State<RegularExample> {
               ),
             ),
             alwaysShowButtons: true,
-            initialValue: 'text <p>new line :D</p>',
-            // 'Read more at <a href="https://www.google.at">Google</a>',
+            initialValue:
+                'Read more at <a href="https://www.google.at">Google</a>',
           ),
         ),
       ),
