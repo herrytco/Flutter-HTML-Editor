@@ -1,3 +1,12 @@
+## 0.4.2
+
+* various small API changes and adaptions
+
+## 0.4.1
+
+* added utility functions back
+* added `LightHtmlParserV3` to the export
+
 ## 0.4.0
 
 * renamed symbols

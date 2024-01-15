@@ -6,7 +6,6 @@ import 'package:light_html_editor/api/stack.dart' as stack;
 import 'package:light_html_editor/api/style_utils.dart';
 import 'package:light_html_editor/api/v3/flat_node.dart';
 import 'package:light_html_editor/api/v3/node_v3.dart';
-import 'package:light_html_editor/api/v3/parser.dart';
 import 'package:light_html_editor/data/text_constants.dart';
 import 'package:light_html_editor/light_html_editor.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -178,7 +177,7 @@ class LightHtmlTextRenderer {
 
         if (fontSizeQueryResult == null) {
           fontSizeQueryResult = k.query(NodeQuery(
-            [QueryType.property, QueryType.styleProperty],
+            [QueryType.tag],
             ["h1", "h2", "h3", "h4", "h5", "h6"],
           ));
 

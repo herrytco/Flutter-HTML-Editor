@@ -57,7 +57,6 @@ class _LightHtmlEditorTextFieldState extends State<LightHtmlEditorTextField> {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      color: Colors.pink[50],
       child: SelectableTextfield(
         widget.editorDecoration,
         _controller,

@@ -1,5 +1,7 @@
 import 'package:light_html_editor/api/exceptions/parse_exceptions.dart';
+import 'package:light_html_editor/api/placeholder.dart';
 import 'package:light_html_editor/api/tag.dart';
+import 'package:light_html_editor/api/regex_provider.dart';
 import 'package:light_html_editor/api/stack.dart';
 import 'package:light_html_editor/api/v3/node_v3.dart';
 import 'package:light_html_editor/api/v3/tokenizer.dart';
@@ -7,6 +9,42 @@ import 'package:light_html_editor/api/v3/tokenizer.dart';
 class LightHtmlParserV3 {
   NodeV3 parse(String? rawHtml) {
     return _ParserV3(rawHtml).root;
+  }
+
+  ///
+  /// remove all tags from a HTML-Richtext and return the raw, unformatted text
+  ///
+  static String cleanTagsFromRichtext(String text) {
+    RegExpMatch? match = RegExProvider.tagRegex.firstMatch(text);
+
+    while (match != null) {
+      text = text.substring(0, match.start) + text.substring(match.end);
+      match = RegExProvider.tagRegex.firstMatch(text);
+    }
+
+    return text;
+  }
+
+  ///
+  /// substitutes the variables occuring in [text] with their respective values
+  /// stored in [placeholders]
+  ///
+  static String replaceVariables(
+    String text, {
+    List<RichTextPlaceholder> placeholders = const [],
+    String placeholderMarker = "\\\$",
+  }) {
+    for (RichTextPlaceholder placeholder in placeholders) {
+      String search =
+          "$placeholderMarker${placeholder.symbol}$placeholderMarker";
+
+      text = text.replaceAll(
+        RegExp(search),
+        "${placeholder.value}",
+      );
+    }
+
+    return text;
   }
 }
 

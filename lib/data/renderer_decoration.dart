@@ -14,6 +14,7 @@ class RendererStyle {
   final Color? linkColor;
   final bool? linkUnderline;
   final bool autoScroll;
+  final bool enableScroll;
 
   /// displayed at the end of a shortened message due to length limits
   final String overflowIndicator;
@@ -34,5 +35,6 @@ class RendererStyle {
     this.overflowIndicator = "...",
     this.textProperties = const [],
     this.errorStyle = TextConstants.errorStyle,
+    this.enableScroll = true,
   });
 }

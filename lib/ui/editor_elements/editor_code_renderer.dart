@@ -114,13 +114,13 @@ class LightHtmlRenderer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue[50],
-      height: double.infinity,
       width: double.infinity,
-      child: SingleChildScrollView(
-        controller: scrollController,
-        child: content,
-      ),
+      child: rendererDecoration.enableScroll
+          ? SingleChildScrollView(
+              controller: scrollController,
+              child: content,
+            )
+          : content,
     );
   }
 }
