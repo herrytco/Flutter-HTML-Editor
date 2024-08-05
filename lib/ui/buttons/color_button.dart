@@ -45,21 +45,24 @@ class FontColorButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FontCustomButton(
       onClick: onClick,
-      icon: Column(
-        mainAxisSize: MainAxisSize.min,
+      icon: Stack(
         children: [
-          Text(
-            "A",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.black,
+          Align(
+            alignment: Alignment.topCenter,
+            child: Text(
+              "A",
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.black,
+              ),
             ),
           ),
-          FractionallySizedBox(
-            widthFactor: .9,
+          Align(
+            alignment: Alignment.bottomCenter,
             child: Container(
               width: double.infinity,
-              height: 5,
+              margin: EdgeInsets.all(4),
+              height: 4,
               decoration: BoxDecoration(
                 color: color,
                 border: Border.all(

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:light_html_editor/api/operations/property_operation.dart';
 import 'package:light_html_editor/api/operations/tag_operation.dart';
@@ -88,14 +90,19 @@ class LightHtmlEditorController extends TextEditingController {
   void insertStyleProperty(StylePropertyOperation op) {
     _cache();
 
-    int opStart = selection.start;
-    int opEnd = selection.end;
+    int opStart = max(0, selection.start);
+    int opEnd = max(0, selection.end);
 
     NodeV3 tree = LightHtmlParserV3().parse(text);
 
     if (opStart == opEnd) {
       var startTag = "<span style=\"${op.propertyKey}:${op.propertyValue}\">";
       var endTag = "</span>";
+
+      print(text);
+      print(opStart);
+      print(opEnd);
+
       text = text.substring(0, opStart) +
           "$startTag$endTag" +
           text.substring(opStart);
