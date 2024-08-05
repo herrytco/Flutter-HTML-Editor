@@ -1,3 +1,9 @@
+## 0.4.3
+
+* fix overflow issue in font color buttons
+* fix linebreak issue on subtags
+* updated dependencies
+
 ## 0.4.2
 
 * various small API changes and adaptions
