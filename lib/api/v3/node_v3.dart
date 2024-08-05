@@ -234,8 +234,10 @@ class NodeV3 {
     return null;
   }
 
-  dynamic query(NodeQuery query) {
+  dynamic query(NodeQuery query, {int? maxDepth}) {
     NodeV3? k = this;
+
+    int currentDepth = 0;
 
     while (k != null) {
       if (k.tag != null) {
@@ -269,6 +271,12 @@ class NodeV3 {
       }
 
       k = k.parent;
+
+      currentDepth++;
+
+      if (currentDepth == maxDepth) {
+        return null;
+      }
     }
   }
 

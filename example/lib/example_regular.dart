@@ -43,7 +43,7 @@ class _RegularExampleState extends State<RegularExample> {
             ),
             alwaysShowButtons: true,
             initialValue:
-                'Read more at <a href="https://www.google.at">Google</a>',
+                '<h2>Demon Shard: <b style="color:#00ff00;">Emerald</b></h2>',
           ),
         ),
       ),
